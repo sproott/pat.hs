@@ -10,6 +10,7 @@ import           Control.Monad.IO.Class            (liftIO)
 import           Control.Monad.Trans.Except        (ExceptT (ExceptT), except,
                                                     runExceptT)
 import           Data.Bifunctor                    (bimap)
+import           Data.Bitraversable                (Bitraversable (bitraverse))
 import qualified Data.Map.Strict                   as Map
 import           Options.Applicative               (execParser, liftA2)
 import           PatHs.Config
@@ -51,9 +52,7 @@ parseConfig :: String -> Either Error Config
 parseConfig = parse InvalidConfig configParser
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
-convertKeys f = uncurry (liftA2 zip)
-  . bimap (traverse f) pure
-  . unzip
+convertKeys f = traverse $ bitraverse f pure
 
 runPatHs :: Marks -> Command c -> AppM ()
 runPatHs marks command = do
