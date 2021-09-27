@@ -9,8 +9,9 @@ module Main where
 import           Control.Monad.IO.Class            (liftIO)
 import           Control.Monad.Trans.Except        (ExceptT (ExceptT), except,
                                                     runExceptT)
+import           Data.Bifunctor                    (bimap)
 import qualified Data.Map.Strict                   as Map
-import           Options.Applicative               (execParser)
+import           Options.Applicative               (execParser, liftA2)
 import           PatHs.Config
 import           PatHs.Lib
 import           PatHs.Options                     (commandP)
@@ -50,10 +51,9 @@ parseConfig :: String -> Either Error Config
 parseConfig = parse InvalidConfig configParser
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
-convertKeys f config = do
-  keys <- sequenceA $ f . fst <$> config
-  let values = snd <$> config
-  pure $ zip keys values
+convertKeys f = uncurry (liftA2 zip)
+  . bimap (traverse f) pure
+  . unzip
 
 runPatHs :: Marks -> Command c -> AppM ()
 runPatHs marks command = do
