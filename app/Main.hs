@@ -71,7 +71,7 @@ consumeResult _ (RTGet (Value valueStr)) = do
 consumeResult _ (RTList marks)           = mapM_ putStrLn $ showMarks marks
 
 saveMarks :: Marks -> IO ()
-saveMarks marks = mapM_ putStrLn $ showMarks marks
+saveMarks = writeFile "/home/davidh/.pat-hs" . marksToConfigString
 
 showMarks :: Marks -> [String]
 showMarks marks = uncurry printTuple <$> Map.toList marks

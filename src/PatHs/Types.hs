@@ -21,9 +21,9 @@ import qualified Data.List       as List
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
-newtype Key = Key String deriving (Eq, Ord, Show)
+newtype Key = Key {unKey :: String} deriving (Eq, Ord, Show)
 newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)
-newtype Value = Value String deriving (Eq, Show)
+newtype Value = Value {unValue :: String} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
 

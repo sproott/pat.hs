@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module PatHs.Config (Config(..), configParser) where
+module PatHs.Config (Config(..), configParser, marksToConfigString) where
 
 import           Control.Applicative  (many, (<|>))
 import           Control.Arrow        ((***))
+import qualified Data.Map.Strict      as Map
 import           Data.Text            (Text)
 import           Data.Void            (Void)
 import           PatHs.Types
@@ -34,3 +35,7 @@ file = many line
 
 configParser :: Parser Config
 configParser = fmap (Key *** Value) <$> file
+
+marksToConfigString :: Marks -> String
+marksToConfigString config = unlines $ uncurry kvToString . (unValidKey *** unValue) <$> Map.toList config
+  where kvToString key value = key <> "=" <> value
