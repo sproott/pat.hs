@@ -37,5 +37,5 @@ configParser :: Parser Config
 configParser = fmap (Key *** Value) <$> file
 
 marksToConfigString :: Marks -> String
-marksToConfigString config = unlines $ uncurry kvToString . (unValidKey *** unValue) <$> Map.toList config
+marksToConfigString = unlines . fmap (uncurry kvToString . (unValidKey *** unValue)) . Map.toList
   where kvToString key value = key <> "=" <> value
