@@ -9,15 +9,15 @@ module Main where
 import           Control.Monad.IO.Class            (liftIO)
 import           Control.Monad.Trans.Except        (ExceptT (ExceptT), except,
                                                     runExceptT)
-import           Data.Bifunctor                    (bimap)
 import           Data.Bitraversable                (Bitraversable (bitraverse))
 import qualified Data.Map.Strict                   as Map
-import           Options.Applicative               (execParser, liftA2)
+import           Options.Applicative               (execParser)
 import           PatHs.Config
 import           PatHs.Lib
 import           PatHs.Options                     (commandP)
 import           PatHs.Types
-import           System.Directory                  (getCurrentDirectory)
+import           System.Directory                  (getCurrentDirectory,
+                                                    getHomeDirectory)
 import           System.Directory.Internal.Prelude (catchIOError)
 import           System.Exit                       (exitFailure)
 
@@ -43,9 +43,13 @@ app = do
   (SomeCommand command) <- liftIO $ execParser (commandP currentDirectory)
   runPatHs marks command
 
+configPath :: FilePath -> FilePath
+configPath homeDir = homeDir <> "/.pat-hs"
+
 loadConfig :: AppM Config
 loadConfig = do
-  !contents <- ExceptT $ (Right <$> readFile "/home/davidh/.pat-hs") `catchIOError` const (pure $ Left ConfigNotExists)
+  homeDir <- liftIO getHomeDirectory
+  !contents <- ExceptT $ (Right <$> readFile (configPath homeDir)) `catchIOError` const (pure $ Left ConfigNotExists)
   except $ parseConfig contents
 
 parseConfig :: String -> Either Error Config
@@ -67,7 +71,9 @@ consumeResult _ (RTGet (Value valueStr)) = do
 consumeResult _ (RTList marks)           = mapM_ putStrLn $ showMarks marks
 
 saveMarks :: Marks -> IO ()
-saveMarks = writeFile "/home/davidh/.pat-hs" . marksToConfigString
+saveMarks marks = do
+  homeDir <- getHomeDirectory
+  writeFile (configPath homeDir) $ marksToConfigString marks
 
 showMarks :: Marks -> [String]
 showMarks marks = uncurry printTuple <$> Map.toList marks
