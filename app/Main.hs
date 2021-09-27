@@ -17,7 +17,6 @@ import           PatHs.Config
 import           PatHs.Lib
 import           PatHs.Options                     (commandP)
 import           PatHs.Types
-import           System.Directory                  (setCurrentDirectory)
 import           System.Directory.Internal.Prelude (catchIOError)
 import           System.Exit                       (exitFailure)
 import           Text.Megaparsec                   (runParser)
@@ -67,7 +66,6 @@ consumeResult _ (RTSave marks)           = saveMarks marks
 consumeResult _ (RTDelete marks)         = saveMarks marks
 consumeResult _ (RTGet (Value valueStr)) = do
   putStrLn valueStr
-  setCurrentDirectory valueStr
 consumeResult _ (RTList marks)           = mapM_ putStrLn $ showMarks marks
 
 saveMarks :: Marks -> IO ()
