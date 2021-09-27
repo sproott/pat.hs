@@ -39,17 +39,23 @@ runApp = runExceptT
 app :: AppM ()
 app = do
   config <- loadConfig
-  liftIO $ print config
+  marks <- except $ Map.fromList <$> convertKeys validateKey config
   (SomeCommand command) <- liftIO $ execParser commandP
   runPatHs marks command
 
 loadConfig :: AppM Config
 loadConfig = do
   !contents <- ExceptT $ (Right <$> readFile "/home/davidh/.pat-hs") `catchIOError` const (pure $ Left ConfigNotExists)
-  parseConfig contents
+  except $ parseConfig contents
 
-parseConfig :: String -> AppM Config
-parseConfig contents = except $ left (const InvalidConfig) $ runParser configParser ".pat-hs" $ Text.pack contents
+parseConfig :: String -> Either Error Config
+parseConfig contents = left (const InvalidConfig) $ runParser configParser ".pat-hs" $ Text.pack contents
+
+convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
+convertKeys f config = do
+  keys <- sequenceA $ f . fst <$> config
+  let values = snd <$> config
+  pure $ zip keys values
 
 runPatHs :: Marks -> Command c -> AppM ()
 runPatHs marks command = do

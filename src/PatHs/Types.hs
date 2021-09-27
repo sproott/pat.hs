@@ -14,7 +14,6 @@ module PatHs.Types (
   ReturnType(..),
   Error(..),
   validateKey,
-  marks
 ) where
 
 import           Control.Arrow   ((***))
@@ -56,6 +55,3 @@ validateKey :: Key -> Either Error ValidKey
 validateKey key@(Key str) = if '/' `elem` str
   then Left $ MalformedKey key
   else pure $ ValidKey str
-
-marks :: Marks
-marks = Map.fromList $ (ValidKey *** Value) <$> [("programming", "/home/davidh/Data/Programming"), ("nvim", "/home/davidh/.config/nvim")]

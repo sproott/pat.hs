@@ -2,17 +2,14 @@
 
 module PatHs.Config (Config(..), configParser) where
 
-import           Control.Applicative        (many, (<|>))
-import           Control.Arrow              ((***))
-import qualified Data.Map.Strict            as Map
-import           Data.Text                  (Text)
-import qualified Data.Text                  as Text
-import           Data.Void                  (Void)
+import           Control.Applicative  (many, (<|>))
+import           Control.Arrow        ((***))
+import           Data.Text            (Text)
+import           Data.Void            (Void)
 import           PatHs.Types
-import           Text.Megaparsec            (Parsec)
-import           Text.Megaparsec.Char       (alphaNumChar, char, letterChar,
-                                             printChar)
-import qualified Text.Megaparsec.Char.Lexer as L
+import           Text.Megaparsec      (Parsec)
+import           Text.Megaparsec.Char (alphaNumChar, char, eol, letterChar,
+                                       printChar)
 
 type Config = [(Key, Value)]
 
@@ -29,6 +26,7 @@ line = do
   key <- ident
   _ <- char '='
   value <- many printChar
+  eol
   pure (key, value)
 
 file :: Parser [(String, String)]
