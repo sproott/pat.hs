@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       PatHs.Config
+      PatHs.Config.Common
       PatHs.Lib
       PatHs.Options
       PatHs.Types

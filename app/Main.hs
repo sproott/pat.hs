@@ -6,20 +6,18 @@
 
 module Main where
 
-import           Control.Arrow                     (ArrowChoice (left))
 import           Control.Monad.IO.Class            (liftIO)
 import           Control.Monad.Trans.Except        (ExceptT (ExceptT), except,
                                                     runExceptT)
 import qualified Data.Map.Strict                   as Map
-import qualified Data.Text                         as Text
 import           Options.Applicative               (execParser)
 import           PatHs.Config
 import           PatHs.Lib
 import           PatHs.Options                     (commandP)
 import           PatHs.Types
+import           System.Directory                  (getCurrentDirectory)
 import           System.Directory.Internal.Prelude (catchIOError)
 import           System.Exit                       (exitFailure)
-import           Text.Megaparsec                   (runParser)
 
 type AppM a = ExceptT Error IO a
 
@@ -39,7 +37,8 @@ app :: AppM ()
 app = do
   config <- loadConfig
   marks <- except $ Map.fromList <$> convertKeys validateKey config
-  (SomeCommand command) <- liftIO $ execParser commandP
+  currentDirectory <- liftIO getCurrentDirectory
+  (SomeCommand command) <- liftIO $ execParser (commandP currentDirectory)
   runPatHs marks command
 
 loadConfig :: AppM Config
@@ -48,7 +47,7 @@ loadConfig = do
   except $ parseConfig contents
 
 parseConfig :: String -> Either Error Config
-parseConfig contents = left (const InvalidConfig) $ runParser configParser ".pat-hs" $ Text.pack contents
+parseConfig = parse InvalidConfig configParser
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f config = do

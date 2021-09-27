@@ -16,10 +16,9 @@ module PatHs.Types (
   validateKey,
 ) where
 
-import           Control.Arrow   ((***))
-import qualified Data.List       as List
-import           Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import           Data.Map.Strict     (Map)
+import           PatHs.Config.Common
+import           Text.Megaparsec     (MonadParsec (eof))
 
 newtype Key = Key {unKey :: String} deriving (Eq, Ord, Show)
 newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)
@@ -52,6 +51,4 @@ deriving instance Show (ReturnType c)
 data Error = InvalidConfig | ConfigNotExists | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
 validateKey :: Key -> Either Error ValidKey
-validateKey key@(Key str) = if '/' `elem` str
-  then Left $ MalformedKey key
-  else pure $ ValidKey str
+validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof) str
