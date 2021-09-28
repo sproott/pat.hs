@@ -4,9 +4,6 @@
 
 module PatHs.Lib where
 
-import           Control.Applicative ((<|>))
-import           Control.Arrow       ((&&&))
-import           Data.Map.Strict     (Map)
 import qualified Data.Map.Strict     as Map
 import           PatHs.Types
 
