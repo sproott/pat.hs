@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds      #-}
 {-# LANGUAGE GADTs          #-}
 {-# LANGUAGE KindSignatures #-}
+
 module PatHs.Lib.Command where
 
 import qualified Data.Map.Strict as Map

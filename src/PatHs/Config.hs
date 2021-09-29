@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module PatHs.Config (Config(..), configParser, parse, marksToConfigString, ident) where
 
 import           Control.Arrow       ((***))

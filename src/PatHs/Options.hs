@@ -1,6 +1,5 @@
-{-# LANGUAGE DataKinds                 #-}
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE KindSignatures            #-}
+{-# LANGUAGE DataKinds #-}
+
 module PatHs.Options (commandP) where
 
 import           Options.Applicative

@@ -1,8 +1,3 @@
-{-# LANGUAGE DataKinds      #-}
-{-# LANGUAGE GADTs          #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE RankNTypes     #-}
-
 module Main where
 
 import           Control.Monad.IO.Class (liftIO)

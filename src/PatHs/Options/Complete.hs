@@ -1,5 +1,7 @@
 {-# LANGUAGE GADTs #-}
+
 module PatHs.Options.Complete where
+
 import           Control.Monad.Trans.Except (except)
 import           Data.Either                (fromRight)
 import           Data.List                  (isPrefixOf)
