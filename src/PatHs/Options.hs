@@ -4,6 +4,7 @@
 module PatHs.Options (commandP) where
 
 import           Options.Applicative
+import           PatHs.Options.Complete (keyCompleter)
 import           PatHs.Types
 
 commandP :: FilePath -> ParserInfo SomeCommand
@@ -36,4 +37,4 @@ listP :: Parser (Command 'List)
 listP = pure CList
 
 keyP :: Parser Key
-keyP = Key <$> argument str (metavar "KEY")
+keyP = Key <$> argument str (metavar "KEY" <> completer keyCompleter)

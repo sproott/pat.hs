@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns   #-}
 {-# LANGUAGE DataKinds      #-}
 {-# LANGUAGE GADTs          #-}
 {-# LANGUAGE KindSignatures #-}
@@ -6,22 +5,13 @@
 
 module Main where
 
-import           Control.Monad.IO.Class            (liftIO)
-import           Control.Monad.Trans.Except        (ExceptT (ExceptT), except,
-                                                    runExceptT)
-import           Data.Bitraversable                (Bitraversable (bitraverse))
-import qualified Data.Map.Strict                   as Map
-import           Options.Applicative               (execParser)
-import           PatHs.Config
+import           Control.Monad.IO.Class (liftIO)
+import           Options.Applicative    (execParser)
 import           PatHs.Lib
-import           PatHs.Options                     (commandP)
+import           PatHs.Options          (commandP)
 import           PatHs.Types
-import           System.Directory                  (getCurrentDirectory,
-                                                    getHomeDirectory)
-import           System.Directory.Internal.Prelude (catchIOError)
-import           System.Exit                       (exitFailure)
-
-type AppM a = ExceptT Error IO a
+import           System.Directory       (getCurrentDirectory)
+import           System.Exit            (exitFailure)
 
 main :: IO ()
 main = do
@@ -32,49 +22,9 @@ main = do
       exitFailure
     Right _ -> pure ()
 
-runApp :: AppM a -> IO (Either Error a)
-runApp = runExceptT
-
 app :: AppM ()
 app = do
-  config <- loadConfig
-  marks <- except $ Map.fromList <$> convertKeys validateKey config
+  marks <- loadMarks
   currentDirectory <- liftIO getCurrentDirectory
   (SomeCommand command) <- liftIO $ execParser (commandP currentDirectory)
   runPatHs marks command
-
-configPath :: FilePath -> FilePath
-configPath homeDir = homeDir <> "/.pat-hs"
-
-loadConfig :: AppM Config
-loadConfig = do
-  homeDir <- liftIO getHomeDirectory
-  !contents <- ExceptT $ (Right <$> readFile (configPath homeDir)) `catchIOError` const (pure $ Left ConfigNotExists)
-  except $ parseConfig contents
-
-parseConfig :: String -> Either Error Config
-parseConfig = parse InvalidConfig configParser
-
-convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
-convertKeys f = traverse $ bitraverse f pure
-
-runPatHs :: Marks -> Command c -> AppM ()
-runPatHs marks command = do
-  result <- except $ runCommand command marks
-  liftIO $ consumeResult command result
-
-consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> IO ()
-consumeResult _ (RTSave marks)           = saveMarks marks
-consumeResult _ (RTDelete marks)         = saveMarks marks
-consumeResult _ (RTGet (Value valueStr)) = do
-  putStrLn valueStr
-consumeResult _ (RTList marks)           = mapM_ putStrLn $ showMarks marks
-
-saveMarks :: Marks -> IO ()
-saveMarks marks = do
-  homeDir <- getHomeDirectory
-  writeFile (configPath homeDir) $ marksToConfigString marks
-
-showMarks :: Marks -> [String]
-showMarks marks = uncurry printTuple <$> Map.toList marks
-    where printTuple validKey (Value value) = unValidKey validKey <> "    " <> value

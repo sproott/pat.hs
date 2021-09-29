@@ -14,11 +14,19 @@ module PatHs.Types (
   ReturnType(..),
   Error(..),
   validateKey,
+  AppM,
+  runApp
 ) where
 
-import           Data.Map.Strict     (Map)
+import           Control.Monad.Trans.Except (ExceptT, runExceptT)
+import           Data.Map.Strict            (Map)
 import           PatHs.Config.Common
-import           Text.Megaparsec     (MonadParsec (eof))
+import           Text.Megaparsec            (MonadParsec (eof))
+
+type AppM a = ExceptT Error IO a
+
+runApp :: AppM a -> IO (Either Error a)
+runApp = runExceptT
 
 newtype Key = Key {unKey :: String} deriving (Eq, Ord, Show)
 newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)

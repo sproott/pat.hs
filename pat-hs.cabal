@@ -28,7 +28,9 @@ library
       PatHs.Config
       PatHs.Config.Common
       PatHs.Lib
+      PatHs.Lib.Command
       PatHs.Options
+      PatHs.Options.Complete
       PatHs.Types
   other-modules:
       Paths_pat_hs
