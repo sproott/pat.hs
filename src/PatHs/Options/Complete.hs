@@ -8,6 +8,7 @@ import           Data.Either                (fromRight)
 import           Data.List                  (isPrefixOf)
 import           Data.List.Extra            (notNull)
 import qualified Data.Map.Strict            as Map
+import           Data.Maybe                 (listToMaybe)
 import           Options.Applicative        (Completer, bashCompleter,
                                              mkCompleter)
 import           Options.Applicative.Types  (Completer (runCompleter))
@@ -35,16 +36,15 @@ goPathCompleter str = do
   if null (unKey key) && notNull (unGoPath goPath) then pure [] else do
     marks <- loadMarks
     (RTList marks) <- except $ list CList marks
-    let matchingMarks = filter (isPrefixOf (unKey key) . unValidKey . fst) $ Map.toList marks
-    case matchingMarks of
-      []            -> pure []
-      [mark]        -> liftIO $ completeSingleMark mark goPath
-      matchingMarks -> pure $ unValidKey . fst <$> matchingMarks
+    let filterMarks fn = filter (fn . unValidKey . fst) $ Map.toList marks
+    let matchingMarks = filterMarks $ isPrefixOf $ unKey key
+    let exactMatch = listToMaybe $ filterMarks (== unKey key)
+    case (length matchingMarks == 1 || notNull (unGoPath goPath), exactMatch) of
+      (True, Just mark) -> liftIO $ completeSingleMark mark goPath
+      _   -> pure $ addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
 
 completeSingleMark :: (ValidKey, Value) -> GoPath -> IO [String]
-completeSingleMark mark goPath = if null (unGoPath goPath)
-  then pure [key, addTrailingPathSeparator key]
-  else resolveDirs mark goPath `catchIOError` const (pure [])
+completeSingleMark mark goPath = resolveDirs mark goPath `catchIOError` const (pure [])
   where
     key = unValidKey $ fst mark
     resolveDirs mark goPath = do
