@@ -32,14 +32,14 @@ keyCompleter str = do
 
 goPathCompleter :: MyCompleter
 goPathCompleter str = do
-  let (key, goPath) = parseGoPath str
-  if null (unKey key) && notNull (unGoPath goPath) then pure [] else do
+  let goPath = mkGoPath str
+  if null (unKey $ key goPath) && notNull (path goPath) then pure [] else do
     marks <- loadMarks
     (RTList marks) <- except $ list CList marks
     let filterMarks fn = filter (fn . unValidKey . fst) $ Map.toList marks
-    let matchingMarks = filterMarks $ isPrefixOf $ unKey key
-    let exactMatch = listToMaybe $ filterMarks (== unKey key)
-    case (length matchingMarks == 1 || notNull (unGoPath goPath), exactMatch) of
+    let matchingMarks = filterMarks $ isPrefixOf $ unKey $ key goPath
+    let exactMatch = listToMaybe $ filterMarks (== unKey (key goPath))
+    case (length matchingMarks == 1 || notNull (path goPath), exactMatch) of
       (True, Just mark) -> liftIO $ completeSingleMark mark goPath
       _   -> pure $ addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
 
@@ -50,7 +50,7 @@ completeSingleMark mark goPath = resolveDirs mark goPath `catchIOError` const (p
     resolveDirs mark goPath = do
       homeDir <- getHomeDirectory'
       let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-      dirs <- completeDirectory $ value <> unGoPath goPath
+      dirs <- completeDirectory $ value <> path goPath
       fmap ((key </>) . makeRelative value) <$> case dirs of
         [dir] -> do
           newCompletions <- completeDirectory $ addTrailingPathSeparator $ value </> dir

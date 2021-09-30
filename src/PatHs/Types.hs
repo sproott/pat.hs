@@ -8,7 +8,7 @@ module PatHs.Types (
   ValidKey(unValidKey),
   Value(unValue),
   ResolvedValue(unResolvedValue),
-  GoPath(..),
+  GoPath(key, path),
   Marks,
   ResolvedMarks,
   CommandType(..),
@@ -21,6 +21,7 @@ module PatHs.Types (
   validateKey,
   resolveToHomeDir,
   unResolveToHomeDir,
+  mkGoPath,
   AppM,
   runApp
 ) where
@@ -42,7 +43,7 @@ newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)
 newtype Value = Value {unValue :: String} deriving (Eq, Show)
 newtype ResolvedValue = ResolvedValue {unResolvedValue :: String} deriving (Eq, Show)
 
-newtype GoPath = GoPath {unGoPath :: String} deriving (Eq, Show)
+data GoPath = GoPath {key :: Key, path :: String} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
 type ResolvedMarks = Map ValidKey ResolvedValue
@@ -55,7 +56,7 @@ data Command (c :: CommandType) where
   CSave :: Key -> Value -> Command Save
   CDelete :: Key -> Command Delete
   CGet :: Key -> Command Get
-  CGo :: HomeDir -> Key -> GoPath -> Command Go
+  CGo :: HomeDir -> GoPath -> Command Go
   CList :: Command List
 
 deriving instance Eq (Command c)
@@ -94,3 +95,6 @@ unResolveToHomeDir :: HomeDir -> String -> Value
 unResolveToHomeDir (HomeDir homeDir) path = if homeDir `isPrefixOf` path
     then Value $ homeDirVariable <> drop (length homeDir) path
     else Value path
+
+mkGoPath :: String -> GoPath
+mkGoPath param = let (keyStr, goPathStr) = span (/= '/') param in GoPath (Key keyStr) $ tail goPathStr

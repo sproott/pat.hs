@@ -3,11 +3,10 @@
 module PatHs.Options (commandP) where
 
 import           Options.Applicative
-import           PatHs.Lib
 import           PatHs.Options.Complete
 import           PatHs.Types
 
-commandP :: HomeDir ->Value -> ParserInfo SomeCommand
+commandP :: HomeDir -> Value -> ParserInfo SomeCommand
 commandP homeDir currentDirectory = info (commandParser homeDir currentDirectory <**> helper)
   ( fullDesc
   <> progDesc "Save often used directories like bookmarks"
@@ -38,7 +37,7 @@ goP :: HomeDir -> Parser (Command 'Go)
 goP homeDir = mkCGo homeDir <$> argument str (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
 
 mkCGo :: HomeDir -> String -> Command 'Go
-mkCGo homeDir str = let (key, goPath) = parseGoPath str in CGo homeDir key goPath
+mkCGo homeDir str = CGo homeDir $ mkGoPath str
 
 listP :: Parser (Command 'List)
 listP = pure CList

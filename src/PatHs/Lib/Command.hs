@@ -34,9 +34,9 @@ get' (CGet key) marks = do
     Just value -> pure value
 
 go :: ExecCommand Go
-go (CGo homeDir key goPath) marks = do
-  value <- get' (CGet key) marks
-  pure $ RTGo $ resolveToHomeDir homeDir $ unValue value </> unGoPath goPath
+go (CGo homeDir goPath) marks = do
+  value <- get' (CGet $ key goPath) marks
+  pure $ RTGo $ resolveToHomeDir homeDir $ unValue value </> path goPath
 
 list :: ExecCommand List
 list CList = pure . RTList

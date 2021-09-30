@@ -64,6 +64,3 @@ showMarks marks = uncurry printTuple <$> Map.toList marks
 
 resolveMarks :: HomeDir -> Marks -> ResolvedMarks
 resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)
-
-parseGoPath :: String -> (Key, GoPath)
-parseGoPath param = let (keyStr, goPathStr) = span (/= '/') param in (Key keyStr, GoPath goPathStr)
