@@ -41,6 +41,7 @@ library
     , containers
     , directory
     , either
+    , extra
     , filepath
     , megaparsec
     , optparse-applicative
@@ -60,6 +61,7 @@ executable pat-hs-exe
     , containers
     , directory
     , either
+    , extra
     , filepath
     , megaparsec
     , optparse-applicative
@@ -81,6 +83,7 @@ test-suite pat-hs-test
     , containers
     , directory
     , either
+    , extra
     , filepath
     , megaparsec
     , optparse-applicative

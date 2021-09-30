@@ -13,7 +13,6 @@ import qualified Data.Map.Strict            as Map
 import           PatHs.Config
 import           PatHs.Lib.Command
 import           PatHs.Types
-import           System.Directory           (getHomeDirectory)
 import           System.IO.Error            (catchIOError)
 
 loadMarks :: AppM Marks
@@ -21,16 +20,16 @@ loadMarks = do
   config <- loadConfig
   except $ Map.fromList <$> convertKeys validateKey config
 
-configPath :: FilePath -> FilePath
-configPath homeDir = homeDir <> "/.pat-hs"
+configPath :: HomeDir -> FilePath
+configPath homeDir = unHomeDir homeDir <> "/.pat-hs"
 
 loadConfig :: AppM Config
 loadConfig = do
-  homeDir <- liftIO getHomeDirectory
+  homeDir <- liftIO getHomeDirectory'
   !contents <- liftIO $ readFile (configPath homeDir) `catchIOError` const (pure "")
   except $ parseConfig homeDir contents
 
-parseConfig :: FilePath -> String -> Either Error Config
+parseConfig :: HomeDir -> String -> Either Error Config
 parseConfig homeDir = parse InvalidConfig (configParser homeDir)
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
@@ -45,20 +44,26 @@ consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> IO ()
 consumeResult _ (RTSave marks)           = saveMarks marks
 consumeResult _ (RTDelete marks)         = saveMarks marks
 consumeResult _ (RTGet value) = do
-  homeDir <- getHomeDirectory
+  homeDir <- getHomeDirectory'
   putStrLn $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
+consumeResult _ (RTGo value) = do
+  homeDir <- getHomeDirectory'
+  putStrLn $ unResolvedValue value
 consumeResult _ (RTList marks)           = do
-  homeDir <- getHomeDirectory
+  homeDir <- getHomeDirectory'
   mapM_ putStrLn $ showMarks $ resolveMarks homeDir marks
 
 saveMarks :: Marks -> IO ()
 saveMarks marks = do
-  homeDir <- getHomeDirectory
+  homeDir <- getHomeDirectory'
   writeFile (configPath homeDir) $ marksToConfigString marks
 
 showMarks :: ResolvedMarks -> [String]
 showMarks marks = uncurry printTuple <$> Map.toList marks
     where printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
 
-resolveMarks :: FilePath -> Marks -> ResolvedMarks
+resolveMarks :: HomeDir -> Marks -> ResolvedMarks
 resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)
+
+parseGoPath :: String -> (Key, GoPath)
+parseGoPath param = let (keyStr, goPathStr) = span (/= '/') param in (Key keyStr, GoPath goPathStr)

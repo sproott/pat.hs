@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+pat-hs() {
+  if [ $1 = "go" ]; then
+    cd "$(pat-hs-exe go $2)";
+  else
+    pat-hs-exe "$@";
+  fi
+}
+
+complete -o filenames -F _pat-hs-exe pat-hs

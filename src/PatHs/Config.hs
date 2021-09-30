@@ -7,7 +7,7 @@ import           PatHs.Types
 
 type Config = [(Key, Value)]
 
-configParser :: FilePath -> Parser Config
+configParser :: HomeDir -> Parser Config
 configParser homeDir = fmap (Key *** unResolveToHomeDir homeDir) <$> file
 
 marksToConfigString :: Marks -> String

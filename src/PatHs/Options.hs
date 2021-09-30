@@ -3,20 +3,22 @@
 module PatHs.Options (commandP) where
 
 import           Options.Applicative
-import           PatHs.Options.Complete (keyCompleter)
+import           PatHs.Lib
+import           PatHs.Options.Complete
 import           PatHs.Types
 
-commandP :: Value -> ParserInfo SomeCommand
-commandP currentDirectory = info (commandParser currentDirectory <**> helper)
+commandP :: HomeDir ->Value -> ParserInfo SomeCommand
+commandP homeDir currentDirectory = info (commandParser homeDir currentDirectory <**> helper)
   ( fullDesc
   <> progDesc "Save often used directories like bookmarks"
   <> header "pat-hs - a terminal directory bookmark utility")
 
-commandParser :: Value -> Parser SomeCommand
-commandParser currentDirectory = subparser (
+commandParser :: HomeDir -> Value -> Parser SomeCommand
+commandParser homeDir currentDirectory = subparser (
      command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
   <> command "delete" (mkCommand deleteP "Delete bookmark")
   <> command "get" (mkCommand getP "Get bookmark")
+  <> command "go" (mkCommand (goP homeDir) "Go to a directory related to bookmark")
   <> command "list" (mkCommand listP "List all bookmarks")
   )
   where
@@ -32,8 +34,14 @@ deleteP = CDelete <$> keyP True
 getP :: Parser (Command 'Get)
 getP = CGet <$> keyP True
 
+goP :: HomeDir -> Parser (Command 'Go)
+goP homeDir = mkCGo homeDir <$> argument str (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
+
+mkCGo :: HomeDir -> String -> Command 'Go
+mkCGo homeDir str = let (key, goPath) = parseGoPath str in CGo homeDir key goPath
+
 listP :: Parser (Command 'List)
 listP = pure CList
 
 keyP :: Bool -> Parser Key
-keyP addCompleter = Key <$> argument str (metavar "KEY" <> if addCompleter then completer keyCompleter else mempty)
+keyP addCompleter = Key <$> argument str (metavar "KEY" <> if addCompleter then completer (mkCompleter' keyCompleter) else mempty)

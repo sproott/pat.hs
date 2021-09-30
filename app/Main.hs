@@ -5,7 +5,7 @@ import           Options.Applicative    (execParser)
 import           PatHs.Lib
 import           PatHs.Options          (commandP)
 import           PatHs.Types
-import           System.Directory       (getCurrentDirectory, getHomeDirectory)
+import           System.Directory       (getCurrentDirectory)
 import           System.Exit            (exitFailure)
 
 main :: IO ()
@@ -21,6 +21,6 @@ app :: AppM ()
 app = do
   marks <- loadMarks
   currentDir <- liftIO getCurrentDirectory
-  homeDir <- liftIO getHomeDirectory
-  (SomeCommand command) <- liftIO $ execParser (commandP $ unResolveToHomeDir homeDir currentDir)
+  homeDir <- liftIO getHomeDirectory'
+  (SomeCommand command) <- liftIO $ execParser (commandP homeDir $ unResolveToHomeDir homeDir currentDir)
   runPatHs marks command
