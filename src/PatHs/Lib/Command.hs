@@ -4,9 +4,11 @@
 
 module PatHs.Lib.Command where
 
+import           Data.Either.Extra    (maybeToEither)
 import qualified Data.Map.Strict      as Map
+import           Data.Maybe           (fromMaybe)
 import           PatHs.Types
-import           System.FilePath.Text ((</>))
+import           System.FilePath.Text (dropTrailingPathSeparator, (</>))
 
 type ExecCommand (c :: CommandType) = Command c -> Marks -> Either Error (ReturnType c)
 
@@ -35,8 +37,9 @@ get' (CGet key) marks = do
 
 go :: ExecCommand Go
 go (CGo homeDir goPath) marks = do
-  value <- get' (CGet $ key goPath) marks
-  pure $ RTGo $ resolveToHomeDir homeDir $ unValue value </> path goPath
+  goPath <- maybeToEither InvalidGoPath goPath
+  value <- get' (CGet $ Key (dropTrailingPathSeparator $ unKey $ key goPath)) marks
+  pure $ RTGo $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)
 
 list :: ExecCommand List
 list CList = pure . RTList

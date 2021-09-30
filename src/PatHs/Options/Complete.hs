@@ -10,7 +10,7 @@ import           Control.Monad.IO.Class     (liftIO)
 import           Control.Monad.Trans.Except (except)
 import           Data.Either                (fromRight)
 import qualified Data.Map.Strict            as Map
-import           Data.Maybe                 (listToMaybe)
+import           Data.Maybe                 (fromMaybe, isJust, listToMaybe)
 import           Data.Text                  (Text)
 import qualified Data.Text                  as Text
 import           Options.Applicative        (Completer, bashCompleter,
@@ -18,6 +18,7 @@ import           Options.Applicative        (Completer, bashCompleter,
 import           Options.Applicative.Types  (Completer (runCompleter))
 import           PatHs.Lib
 import           PatHs.Lib.Command
+import           PatHs.Parser               (parse, splitGoPath)
 import           PatHs.Types
 import           System.FilePath.Text       (addTrailingPathSeparator,
                                              makeRelative, (</>))
@@ -36,19 +37,23 @@ keyCompleter str = do
   pure $ filter (Text.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
 goPathCompleter :: MyCompleter
-goPathCompleter str = if Text.null (unKey $ key goPath) && not (Text.null (path goPath))
-  then pure []
-  else do
-    marks          <- loadMarks
-    (RTList marks) <- except $ list CList marks
-    let matchingMarks = filterMarks (Text.isPrefixOf $ unKey $ key goPath) marks
-    let exactMatch    = listToMaybe $ filterMarks (== unKey (key goPath)) marks
-    case (length matchingMarks == 1 || not (Text.null (path goPath)), exactMatch) of
-      (True, Just mark) -> liftIO $ completeSingleMark mark goPath
-      _ -> pure $ addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
- where
-  goPath = mkGoPath str
-  filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
+goPathCompleter str = do
+  -- TODO don't break if key is empty
+  (keyStr, goPathStr) <- except $ parse InvalidGoPath splitGoPath str
+  marks          <- loadMarks
+  case keyStr of
+    Nothing -> pure $ completeMarks $ Map.toList marks
+    Just keyStr -> do
+      (RTList marks) <- except $ list CList marks
+      let goPath = GoPath (Key keyStr) goPathStr
+      let matchingMarks = filterMarks (Text.isPrefixOf keyStr) marks
+      let exactMatch    = listToMaybe $ filterMarks (== keyStr) marks
+      case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
+        (True, Just mark) -> liftIO $ completeSingleMark mark goPath
+        _                 -> pure $ completeMarks matchingMarks
+  where
+    completeMarks matchingMarks = addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
+    filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
 completeSingleMark :: (ValidKey, Value) -> GoPath -> IO [Text]
 completeSingleMark mark goPath = resolveDirs mark goPath
@@ -58,7 +63,7 @@ completeSingleMark mark goPath = resolveDirs mark goPath
   resolveDirs mark goPath = do
     homeDir <- getHomeDirectory'
     let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-    dirs <- completeDirectory $ value <> path goPath
+    dirs <- completeDirectory $ value <> fromMaybe mempty (path goPath)
     fmap ((key </>) . makeRelative value) <$> case dirs of
       [dir] -> do
         newCompletions <-

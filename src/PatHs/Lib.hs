@@ -15,6 +15,7 @@ import qualified Data.Text                  as Text
 import qualified Data.Text.IO               as TextIO
 import           PatHs.Config
 import           PatHs.Lib.Command
+import           PatHs.Parser
 import           PatHs.Types
 import           System.IO.Error            (catchIOError)
 

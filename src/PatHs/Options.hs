@@ -2,6 +2,7 @@
 
 module PatHs.Options (commandP) where
 
+import           Data.Either.Extra      (eitherToMaybe)
 import           Data.Text              (Text)
 import           Options.Applicative
 import           PatHs.Options.Complete
@@ -38,7 +39,7 @@ goP :: HomeDir -> Parser (Command 'Go)
 goP homeDir = mkCGo homeDir <$> argument str (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
 
 mkCGo :: HomeDir -> Text -> Command 'Go
-mkCGo homeDir str = CGo homeDir $ mkGoPath str
+mkCGo homeDir str = CGo homeDir $ eitherToMaybe $ mkGoPath str
 
 listP :: Parser (Command 'List)
 listP = pure CList

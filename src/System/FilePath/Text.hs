@@ -1,6 +1,8 @@
 module System.FilePath.Text
   ( (</>)
   , addTrailingPathSeparator
+  , dropTrailingPathSeparator
+  , hasTrailingPathSeparator
   , makeRelative
   ) where
 
@@ -20,6 +22,12 @@ convert2 f = (Text.pack .) . (f `on` Text.unpack)
 
 addTrailingPathSeparator :: Text -> Text
 addTrailingPathSeparator = convert FP.addTrailingPathSeparator
+
+dropTrailingPathSeparator :: Text -> Text
+dropTrailingPathSeparator = convert FP.dropTrailingPathSeparator
+
+hasTrailingPathSeparator :: Text -> Bool
+hasTrailingPathSeparator = FP.hasTrailingPathSeparator . Text.unpack
 
 makeRelative :: Text -> Text -> Text
 makeRelative = convert2 FP.makeRelative

@@ -8,7 +8,7 @@ module PatHs.Types (
   ValidKey(unValidKey),
   Value(unValue),
   ResolvedValue(unResolvedValue),
-  GoPath(key, path),
+  GoPath(..),
   Marks,
   ResolvedMarks,
   CommandType(..),
@@ -26,12 +26,16 @@ module PatHs.Types (
   runApp
 ) where
 
+import           Control.Monad              (guard)
 import           Control.Monad.Trans.Except (ExceptT, runExceptT)
+import           Data.Either.Combinators    (maybeToRight)
 import           Data.Map.Strict            (Map)
+import           Data.Maybe                 (isJust)
 import           Data.Text                  (Text, isPrefixOf)
 import qualified Data.Text                  as Text
-import           PatHs.Config.Common
+import           PatHs.Parser
 import           System.Directory           (getHomeDirectory)
+import           System.FilePath            (pathSeparator)
 import           Text.Megaparsec            (MonadParsec (eof))
 
 type AppM a = ExceptT Error IO a
@@ -44,7 +48,7 @@ newtype ValidKey = ValidKey {unValidKey :: Text} deriving (Eq, Ord, Show)
 newtype Value = Value {unValue :: Text} deriving (Eq, Show)
 newtype ResolvedValue = ResolvedValue {unResolvedValue :: Text} deriving (Eq, Show)
 
-data GoPath = GoPath {key :: Key, path :: Text} deriving (Eq, Show)
+data GoPath = GoPath {key :: Key, path :: Maybe Text} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
 type ResolvedMarks = Map ValidKey ResolvedValue
@@ -57,7 +61,7 @@ data Command (c :: CommandType) where
   CSave :: Key -> Value -> Command Save
   CDelete :: Key -> Command Delete
   CGet :: Key -> Command Get
-  CGo :: HomeDir -> GoPath -> Command Go
+  CGo :: HomeDir -> Maybe GoPath -> Command Go
   CList :: Command List
 
 deriving instance Eq (Command c)
@@ -75,7 +79,7 @@ data ReturnType (c :: CommandType) where
 deriving instance Eq (ReturnType c)
 deriving instance Show (ReturnType c)
 
-data Error = InvalidConfig | ConfigNotExists | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
+data Error = InvalidConfig | InvalidGoPath | ConfigNotExists | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
 getHomeDirectory' :: IO HomeDir
 getHomeDirectory' = HomeDir . Text.pack <$> getHomeDirectory
@@ -97,5 +101,8 @@ unResolveToHomeDir (HomeDir homeDir) path = if homeDir `isPrefixOf` path
     then Value $ homeDirVariable <> Text.drop (Text.length homeDir) path
     else Value path
 
-mkGoPath :: Text -> GoPath
-mkGoPath param = let (keyStr, goPathStr) = Text.span (/= '/') param in GoPath (Key keyStr) $ Text.tail goPathStr
+mkGoPath :: Text -> Either Error GoPath
+mkGoPath param = do
+  (keyStr, goPathStr) <- parse InvalidGoPath splitGoPath param
+  keyStr <- maybeToRight InvalidGoPath keyStr
+  pure $ GoPath (Key keyStr) goPathStr
