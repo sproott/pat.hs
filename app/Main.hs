@@ -1,6 +1,7 @@
 module Main where
 
 import           Control.Monad.IO.Class (liftIO)
+import qualified Data.Text              as Text
 import           Options.Applicative    (execParser)
 import           PatHs.Lib
 import           PatHs.Options          (commandP)
@@ -20,7 +21,7 @@ main = do
 app :: AppM ()
 app = do
   marks <- loadMarks
-  currentDir <- liftIO getCurrentDirectory
+  currentDir <- Text.pack <$> liftIO getCurrentDirectory
   homeDir <- liftIO getHomeDirectory'
   (SomeCommand command) <- liftIO $ execParser (commandP homeDir $ unResolveToHomeDir homeDir currentDir)
   runPatHs marks command

@@ -2,6 +2,7 @@
 
 module PatHs.Options (commandP) where
 
+import           Data.Text              (Text)
 import           Options.Applicative
 import           PatHs.Options.Complete
 import           PatHs.Types
@@ -36,7 +37,7 @@ getP = CGet <$> keyP True
 goP :: HomeDir -> Parser (Command 'Go)
 goP homeDir = mkCGo homeDir <$> argument str (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
 
-mkCGo :: HomeDir -> String -> Command 'Go
+mkCGo :: HomeDir -> Text -> Command 'Go
 mkCGo homeDir str = CGo homeDir $ mkGoPath str
 
 listP :: Parser (Command 'List)

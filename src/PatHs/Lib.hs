@@ -10,6 +10,9 @@ import           Control.Monad.IO.Class     (liftIO)
 import           Control.Monad.Trans.Except (except)
 import           Data.Bitraversable         (bitraverse)
 import qualified Data.Map.Strict            as Map
+import           Data.Text                  (Text)
+import qualified Data.Text                  as Text
+import qualified Data.Text.IO               as TextIO
 import           PatHs.Config
 import           PatHs.Lib.Command
 import           PatHs.Types
@@ -20,16 +23,16 @@ loadMarks = do
   config <- loadConfig
   except $ Map.fromList <$> convertKeys validateKey config
 
-configPath :: HomeDir -> FilePath
-configPath homeDir = unHomeDir homeDir <> "/.pat-hs"
+configPath :: HomeDir -> String
+configPath homeDir = Text.unpack (unHomeDir homeDir) <> "/.pat-hs"
 
 loadConfig :: AppM Config
 loadConfig = do
   homeDir <- liftIO getHomeDirectory'
-  !contents <- liftIO $ readFile (configPath homeDir) `catchIOError` const (pure "")
+  !contents <- liftIO $ TextIO.readFile (configPath homeDir) `catchIOError` const (pure "")
   except $ parseConfig homeDir contents
 
-parseConfig :: HomeDir -> String -> Either Error Config
+parseConfig :: HomeDir -> Text -> Either Error Config
 parseConfig homeDir = parse InvalidConfig (configParser homeDir)
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
@@ -45,20 +48,20 @@ consumeResult _ (RTSave marks)           = saveMarks marks
 consumeResult _ (RTDelete marks)         = saveMarks marks
 consumeResult _ (RTGet value) = do
   homeDir <- getHomeDirectory'
-  putStrLn $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
+  putStrLn $ Text.unpack $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
 consumeResult _ (RTGo value) = do
   homeDir <- getHomeDirectory'
-  putStrLn $ unResolvedValue value
+  TextIO.putStrLn $ unResolvedValue value
 consumeResult _ (RTList marks)           = do
   homeDir <- getHomeDirectory'
-  mapM_ putStrLn $ showMarks $ resolveMarks homeDir marks
+  mapM_ TextIO.putStrLn $ showMarks $ resolveMarks homeDir marks
 
 saveMarks :: Marks -> IO ()
 saveMarks marks = do
   homeDir <- getHomeDirectory'
-  writeFile (configPath homeDir) $ marksToConfigString marks
+  TextIO.writeFile (configPath homeDir) $ marksToConfigString marks
 
-showMarks :: ResolvedMarks -> [String]
+showMarks :: ResolvedMarks -> [Text]
 showMarks marks = uncurry printTuple <$> Map.toList marks
     where printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
 

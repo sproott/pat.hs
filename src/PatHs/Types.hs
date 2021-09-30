@@ -27,8 +27,9 @@ module PatHs.Types (
 ) where
 
 import           Control.Monad.Trans.Except (ExceptT, runExceptT)
-import           Data.List                  (isPrefixOf)
 import           Data.Map.Strict            (Map)
+import           Data.Text                  (Text, isPrefixOf)
+import qualified Data.Text                  as Text
 import           PatHs.Config.Common
 import           System.Directory           (getHomeDirectory)
 import           Text.Megaparsec            (MonadParsec (eof))
@@ -38,19 +39,19 @@ type AppM a = ExceptT Error IO a
 runApp :: AppM a -> IO (Either Error a)
 runApp = runExceptT
 
-newtype Key = Key {unKey :: String} deriving (Eq, Ord, Show)
-newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)
-newtype Value = Value {unValue :: String} deriving (Eq, Show)
-newtype ResolvedValue = ResolvedValue {unResolvedValue :: String} deriving (Eq, Show)
+newtype Key = Key {unKey :: Text} deriving (Eq, Ord, Show)
+newtype ValidKey = ValidKey {unValidKey :: Text} deriving (Eq, Ord, Show)
+newtype Value = Value {unValue :: Text} deriving (Eq, Show)
+newtype ResolvedValue = ResolvedValue {unResolvedValue :: Text} deriving (Eq, Show)
 
-data GoPath = GoPath {key :: Key, path :: String} deriving (Eq, Show)
+data GoPath = GoPath {key :: Key, path :: Text} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
 type ResolvedMarks = Map ValidKey ResolvedValue
 
 data CommandType = Save | Delete | Get | List | Go
 
-newtype HomeDir = HomeDir {unHomeDir :: FilePath} deriving (Eq, Show)
+newtype HomeDir = HomeDir {unHomeDir :: Text} deriving (Eq, Show)
 
 data Command (c :: CommandType) where
   CSave :: Key -> Value -> Command Save
@@ -77,24 +78,24 @@ deriving instance Show (ReturnType c)
 data Error = InvalidConfig | ConfigNotExists | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
 getHomeDirectory' :: IO HomeDir
-getHomeDirectory' = HomeDir <$> getHomeDirectory
+getHomeDirectory' = HomeDir . Text.pack <$> getHomeDirectory
 
 validateKey :: Key -> Either Error ValidKey
 validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof) str
 
-homeDirVariable :: String
+homeDirVariable :: Text
 homeDirVariable = "$HOME"
 
-resolveToHomeDir :: HomeDir -> String -> ResolvedValue
+resolveToHomeDir :: HomeDir -> Text -> ResolvedValue
 resolveToHomeDir (HomeDir homeDir) path = ResolvedValue $
   if homeDirVariable `isPrefixOf` path then
-    homeDir <> drop (length homeDirVariable) path
+    homeDir <> Text.drop (Text.length homeDirVariable) path
   else path
 
-unResolveToHomeDir :: HomeDir -> String -> Value
+unResolveToHomeDir :: HomeDir -> Text -> Value
 unResolveToHomeDir (HomeDir homeDir) path = if homeDir `isPrefixOf` path
-    then Value $ homeDirVariable <> drop (length homeDir) path
+    then Value $ homeDirVariable <> Text.drop (Text.length homeDir) path
     else Value path
 
-mkGoPath :: String -> GoPath
-mkGoPath param = let (keyStr, goPathStr) = span (/= '/') param in GoPath (Key keyStr) $ tail goPathStr
+mkGoPath :: Text -> GoPath
+mkGoPath param = let (keyStr, goPathStr) = Text.span (/= '/') param in GoPath (Key keyStr) $ Text.tail goPathStr

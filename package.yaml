@@ -28,8 +28,11 @@ dependencies:
   - filepath
   - megaparsec
   - optparse-applicative
-  - text
+  - text >= 1.2.5.0
   - transformers
+
+default-extensions:
+  - OverloadedStrings
 
 library:
   source-dirs: src

@@ -4,9 +4,9 @@
 
 module PatHs.Lib.Command where
 
-import qualified Data.Map.Strict as Map
+import qualified Data.Map.Strict      as Map
 import           PatHs.Types
-import           System.FilePath ((</>))
+import           System.FilePath.Text ((</>))
 
 type ExecCommand (c :: CommandType) = Command c -> Marks -> Either Error (ReturnType c)
 
