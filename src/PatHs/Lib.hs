@@ -7,7 +7,7 @@
 module PatHs.Lib where
 
 import           Control.Monad.IO.Class     (liftIO)
-import           Control.Monad.Trans.Except (ExceptT (ExceptT), except)
+import           Control.Monad.Trans.Except (except)
 import           Data.Bitraversable         (bitraverse)
 import qualified Data.Map.Strict            as Map
 import           PatHs.Config
@@ -27,11 +27,11 @@ configPath homeDir = homeDir <> "/.pat-hs"
 loadConfig :: AppM Config
 loadConfig = do
   homeDir <- liftIO getHomeDirectory
-  !contents <- ExceptT $ (Right <$> readFile (configPath homeDir)) `catchIOError` const (pure $ Left ConfigNotExists)
-  except $ parseConfig contents
+  !contents <- liftIO $ readFile (configPath homeDir) `catchIOError` const (pure "")
+  except $ parseConfig homeDir contents
 
-parseConfig :: String -> Either Error Config
-parseConfig = parse InvalidConfig configParser
+parseConfig :: FilePath -> String -> Either Error Config
+parseConfig homeDir = parse InvalidConfig (configParser homeDir)
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
@@ -44,15 +44,21 @@ runPatHs marks command = do
 consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> IO ()
 consumeResult _ (RTSave marks)           = saveMarks marks
 consumeResult _ (RTDelete marks)         = saveMarks marks
-consumeResult _ (RTGet (Value valueStr)) = do
-  putStrLn valueStr
-consumeResult _ (RTList marks)           = mapM_ putStrLn $ showMarks marks
+consumeResult _ (RTGet value) = do
+  homeDir <- getHomeDirectory
+  putStrLn $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
+consumeResult _ (RTList marks)           = do
+  homeDir <- getHomeDirectory
+  mapM_ putStrLn $ showMarks $ resolveMarks homeDir marks
 
 saveMarks :: Marks -> IO ()
 saveMarks marks = do
   homeDir <- getHomeDirectory
   writeFile (configPath homeDir) $ marksToConfigString marks
 
-showMarks :: Marks -> [String]
+showMarks :: ResolvedMarks -> [String]
 showMarks marks = uncurry printTuple <$> Map.toList marks
-    where printTuple validKey (Value value) = unValidKey validKey <> "    " <> value
+    where printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
+
+resolveMarks :: FilePath -> Marks -> ResolvedMarks
+resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)

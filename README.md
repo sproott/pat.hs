@@ -1,1 +1,1 @@
-# pat-hs
+# pat.hs

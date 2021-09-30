@@ -6,21 +6,27 @@
 module PatHs.Types (
   Key(..),
   ValidKey(unValidKey),
-  Value(..),
+  Value(unValue),
+  ResolvedValue(unResolvedValue),
   Marks,
+  ResolvedMarks,
   CommandType(..),
   Command(..),
   SomeCommand(..),
   ReturnType(..),
   Error(..),
   validateKey,
+  resolveToHomeDir,
+  unResolveToHomeDir,
   AppM,
   runApp
 ) where
 
 import           Control.Monad.Trans.Except (ExceptT, runExceptT)
+import           Data.List                  (isPrefixOf)
 import           Data.Map.Strict            (Map)
 import           PatHs.Config.Common
+import           System.Directory           (getHomeDirectory)
 import           Text.Megaparsec            (MonadParsec (eof))
 
 type AppM a = ExceptT Error IO a
@@ -31,8 +37,10 @@ runApp = runExceptT
 newtype Key = Key {unKey :: String} deriving (Eq, Ord, Show)
 newtype ValidKey = ValidKey {unValidKey :: String} deriving (Eq, Ord, Show)
 newtype Value = Value {unValue :: String} deriving (Eq, Show)
+newtype ResolvedValue = ResolvedValue {unResolvedValue :: String} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
+type ResolvedMarks = Map ValidKey ResolvedValue
 
 data CommandType = Save | Delete | Get | List
 
@@ -60,3 +68,17 @@ data Error = InvalidConfig | ConfigNotExists | AlreadyExists Key Value | Malform
 
 validateKey :: Key -> Either Error ValidKey
 validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof) str
+
+homeDirVariable :: String
+homeDirVariable = "$HOME"
+
+resolveToHomeDir :: FilePath -> String -> ResolvedValue
+resolveToHomeDir homeDir path = ResolvedValue $
+  if homeDirVariable `isPrefixOf` path then
+    homeDir <> drop (length homeDirVariable) path
+  else path
+
+unResolveToHomeDir :: FilePath -> String -> Value
+unResolveToHomeDir homeDir path = if homeDir `isPrefixOf` path
+    then Value $ homeDirVariable <> drop (length homeDir) path
+    else Value path

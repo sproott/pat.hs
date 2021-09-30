@@ -7,8 +7,8 @@ import           PatHs.Types
 
 type Config = [(Key, Value)]
 
-configParser :: Parser Config
-configParser = fmap (Key *** Value) <$> file
+configParser :: FilePath -> Parser Config
+configParser homeDir = fmap (Key *** unResolveToHomeDir homeDir) <$> file
 
 marksToConfigString :: Marks -> String
 marksToConfigString = unlines . fmap (uncurry kvToString . (unValidKey *** unValue)) . Map.toList

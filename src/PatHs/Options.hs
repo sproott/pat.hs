@@ -6,13 +6,13 @@ import           Options.Applicative
 import           PatHs.Options.Complete (keyCompleter)
 import           PatHs.Types
 
-commandP :: FilePath -> ParserInfo SomeCommand
+commandP :: Value -> ParserInfo SomeCommand
 commandP currentDirectory = info (commandParser currentDirectory <**> helper)
   ( fullDesc
   <> progDesc "Save often used directories like bookmarks"
   <> header "pat-hs - a terminal directory bookmark utility")
 
-commandParser :: FilePath -> Parser SomeCommand
+commandParser :: Value -> Parser SomeCommand
 commandParser currentDirectory = subparser (
      command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
   <> command "delete" (mkCommand deleteP "Delete bookmark")
@@ -23,8 +23,8 @@ commandParser currentDirectory = subparser (
     mkCommand :: Parser (Command c) -> String -> ParserInfo SomeCommand
     mkCommand parser desc = info (SomeCommand <$> parser) $ progDesc desc
 
-saveP :: FilePath -> Parser (Command 'Save)
-saveP currentDirectory = CSave <$> keyP False <*> pure (Value currentDirectory)
+saveP :: Value -> Parser (Command 'Save)
+saveP currentDirectory = CSave <$> keyP False <*> pure currentDirectory
 
 deleteP :: Parser (Command 'Delete)
 deleteP = CDelete <$> keyP True
