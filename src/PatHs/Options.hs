@@ -24,16 +24,16 @@ commandParser currentDirectory = subparser (
     mkCommand parser desc = info (SomeCommand <$> parser) $ progDesc desc
 
 saveP :: FilePath -> Parser (Command 'Save)
-saveP currentDirectory = CSave <$> keyP <*> pure (Value currentDirectory)
+saveP currentDirectory = CSave <$> keyP False <*> pure (Value currentDirectory)
 
 deleteP :: Parser (Command 'Delete)
-deleteP = CDelete <$> keyP
+deleteP = CDelete <$> keyP True
 
 getP :: Parser (Command 'Get)
-getP = CGet <$> keyP
+getP = CGet <$> keyP True
 
 listP :: Parser (Command 'List)
 listP = pure CList
 
-keyP :: Parser Key
-keyP = Key <$> argument str (metavar "KEY" <> completer keyCompleter)
+keyP :: Bool -> Parser Key
+keyP addCompleter = Key <$> argument str (metavar "KEY" <> if addCompleter then completer keyCompleter else mempty)
