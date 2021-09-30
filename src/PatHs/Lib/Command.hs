@@ -1,14 +1,14 @@
-{-# LANGUAGE DataKinds      #-}
-{-# LANGUAGE GADTs          #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 
 module PatHs.Lib.Command where
 
-import           Data.Either.Extra    (maybeToEither)
-import qualified Data.Map.Strict      as Map
-import           Data.Maybe           (fromMaybe)
-import           PatHs.Types
-import           System.FilePath.Text (dropTrailingPathSeparator, (</>))
+import Data.Either.Extra (maybeToEither)
+import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
+import PatHs.Types
+import System.FilePath.Text (dropTrailingPathSeparator, (</>))
 
 type ExecCommand (c :: CommandType) = Command c -> Marks -> Either Error (ReturnType c)
 
@@ -17,7 +17,7 @@ save (CSave key value) marks = do
   validKey <- validateKey key
   case Map.lookup validKey marks of
     Just value -> Left $ AlreadyExists key value
-    Nothing    -> pure $ RTSave $ Map.insert validKey value marks
+    Nothing -> pure $ RTSave $ Map.insert validKey value marks
 
 delete :: ExecCommand Delete
 delete (CDelete key) marks = do
@@ -32,7 +32,7 @@ get' :: Command Get -> Marks -> Either Error Value
 get' (CGet key) marks = do
   validKey <- validateKey key
   case Map.lookup validKey marks of
-    Nothing    -> Left $ NotExists key
+    Nothing -> Left $ NotExists key
     Just value -> pure value
 
 go :: ExecCommand Go
@@ -45,8 +45,8 @@ list :: ExecCommand List
 list CList = pure . RTList
 
 runCommand :: ExecCommand c
-runCommand command@CSave {}   = save command
+runCommand command@CSave {} = save command
 runCommand command@CDelete {} = delete command
-runCommand command@CGet {}    = get command
-runCommand command@CGo {}     = go command
-runCommand command@CList      = list command
+runCommand command@CGet {} = get command
+runCommand command@CGo {} = go command
+runCommand command@CList = list command

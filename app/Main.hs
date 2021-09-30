@@ -1,13 +1,13 @@
 module Main where
 
-import           Control.Monad.IO.Class (liftIO)
-import qualified Data.Text              as Text
-import           Options.Applicative    (execParser)
-import           PatHs.Lib
-import           PatHs.Options          (commandP)
-import           PatHs.Types
-import           System.Directory       (getCurrentDirectory)
-import           System.Exit            (exitFailure)
+import Control.Monad.IO.Class (liftIO)
+import qualified Data.Text as Text
+import Options.Applicative (execParser)
+import PatHs.Lib
+import PatHs.Options (commandP)
+import PatHs.Types
+import System.Directory (getCurrentDirectory)
+import System.Exit (exitFailure)
 
 main :: IO ()
 main = do

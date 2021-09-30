@@ -1,14 +1,19 @@
 module PatHs.Parser where
 
-import           Control.Applicative  (empty, (<|>))
-import           Control.Arrow        (left)
-import           Data.Text            (Text)
-import qualified Data.Text            as Text
-import           Data.Void            (Void)
-import           System.FilePath      (pathSeparator)
-import           Text.Megaparsec      (Parsec, many, optional, runParser)
-import           Text.Megaparsec.Char (alphaNumChar, char, eol, letterChar,
-                                       printChar)
+import Control.Applicative (empty, (<|>))
+import Control.Arrow (left)
+import Data.Text (Text)
+import qualified Data.Text as Text
+import Data.Void (Void)
+import System.FilePath (pathSeparator)
+import Text.Megaparsec (Parsec, many, optional, runParser)
+import Text.Megaparsec.Char
+  ( alphaNumChar,
+    char,
+    eol,
+    letterChar,
+    printChar,
+  )
 
 type Parser = Parsec Void Text
 
@@ -16,7 +21,7 @@ ident :: Parser Text
 ident = do
   c <- letterChar <|> char '_'
   cs <- many (alphaNumChar <|> char '_')
-  pure $ Text.pack (c:cs)
+  pure $ Text.pack (c : cs)
 
 line :: Parser (Text, Text)
 line = do

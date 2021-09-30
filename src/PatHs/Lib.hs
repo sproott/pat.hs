@@ -1,23 +1,23 @@
-{-# LANGUAGE BangPatterns   #-}
-{-# LANGUAGE DataKinds      #-}
-{-# LANGUAGE GADTs          #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE RankNTypes     #-}
+{-# LANGUAGE RankNTypes #-}
 
 module PatHs.Lib where
 
-import           Control.Monad.IO.Class     (liftIO)
-import           Control.Monad.Trans.Except (except)
-import           Data.Bitraversable         (bitraverse)
-import qualified Data.Map.Strict            as Map
-import           Data.Text                  (Text)
-import qualified Data.Text                  as Text
-import qualified Data.Text.IO               as TextIO
-import           PatHs.Config
-import           PatHs.Lib.Command
-import           PatHs.Parser
-import           PatHs.Types
-import           System.IO.Error            (catchIOError)
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Except (except)
+import Data.Bitraversable (bitraverse)
+import qualified Data.Map.Strict as Map
+import Data.Text (Text)
+import qualified Data.Text as Text
+import qualified Data.Text.IO as TextIO
+import PatHs.Config
+import PatHs.Lib.Command
+import PatHs.Parser
+import PatHs.Types
+import System.IO.Error (catchIOError)
 
 loadMarks :: AppM Marks
 loadMarks = do
@@ -45,15 +45,15 @@ runPatHs marks command = do
   liftIO $ consumeResult command result
 
 consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> IO ()
-consumeResult _ (RTSave marks)           = saveMarks marks
-consumeResult _ (RTDelete marks)         = saveMarks marks
+consumeResult _ (RTSave marks) = saveMarks marks
+consumeResult _ (RTDelete marks) = saveMarks marks
 consumeResult _ (RTGet value) = do
   homeDir <- getHomeDirectory'
   putStrLn $ Text.unpack $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
 consumeResult _ (RTGo value) = do
   homeDir <- getHomeDirectory'
   TextIO.putStrLn $ unResolvedValue value
-consumeResult _ (RTList marks)           = do
+consumeResult _ (RTList marks) = do
   homeDir <- getHomeDirectory'
   mapM_ TextIO.putStrLn $ showMarks $ resolveMarks homeDir marks
 
@@ -64,7 +64,8 @@ saveMarks marks = do
 
 showMarks :: ResolvedMarks -> [Text]
 showMarks marks = uncurry printTuple <$> Map.toList marks
-    where printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
+  where
+    printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
 
 resolveMarks :: HomeDir -> Marks -> ResolvedMarks
 resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)

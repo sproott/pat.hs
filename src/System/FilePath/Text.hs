@@ -1,14 +1,15 @@
 module System.FilePath.Text
-  ( (</>)
-  , addTrailingPathSeparator
-  , dropTrailingPathSeparator
-  , hasTrailingPathSeparator
-  , makeRelative
-  ) where
+  ( (</>),
+    addTrailingPathSeparator,
+    dropTrailingPathSeparator,
+    hasTrailingPathSeparator,
+    makeRelative,
+  )
+where
 
-import           Data.Function   (on)
-import           Data.Text       (Text)
-import qualified Data.Text       as Text
+import Data.Function (on)
+import Data.Text (Text)
+import qualified Data.Text as Text
 import qualified System.FilePath as FP
 
 convert :: (FilePath -> FilePath) -> Text -> Text

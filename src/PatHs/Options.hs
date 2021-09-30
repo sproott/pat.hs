@@ -2,26 +2,30 @@
 
 module PatHs.Options (commandP) where
 
-import           Data.Either.Extra      (eitherToMaybe)
-import           Data.Text              (Text)
-import           Options.Applicative
-import           PatHs.Options.Complete
-import           PatHs.Types
+import Data.Either.Extra (eitherToMaybe)
+import Data.Text (Text)
+import Options.Applicative
+import PatHs.Options.Complete
+import PatHs.Types
 
 commandP :: HomeDir -> Value -> ParserInfo SomeCommand
-commandP homeDir currentDirectory = info (commandParser homeDir currentDirectory <**> helper)
-  ( fullDesc
-  <> progDesc "Save often used directories like bookmarks"
-  <> header "pat-hs - a terminal directory bookmark utility")
+commandP homeDir currentDirectory =
+  info
+    (commandParser homeDir currentDirectory <**> helper)
+    ( fullDesc
+        <> progDesc "Save often used directories like bookmarks"
+        <> header "pat-hs - a terminal directory bookmark utility"
+    )
 
 commandParser :: HomeDir -> Value -> Parser SomeCommand
-commandParser homeDir currentDirectory = subparser (
-     command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
-  <> command "delete" (mkCommand deleteP "Delete bookmark")
-  <> command "get" (mkCommand getP "Get bookmark")
-  <> command "go" (mkCommand (goP homeDir) "Go to a directory related to bookmark")
-  <> command "list" (mkCommand listP "List all bookmarks")
-  )
+commandParser homeDir currentDirectory =
+  subparser
+    ( command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
+        <> command "delete" (mkCommand deleteP "Delete bookmark")
+        <> command "get" (mkCommand getP "Get bookmark")
+        <> command "go" (mkCommand (goP homeDir) "Go to a directory related to bookmark")
+        <> command "list" (mkCommand listP "List all bookmarks")
+    )
   where
     mkCommand :: Parser (Command c) -> String -> ParserInfo SomeCommand
     mkCommand parser desc = info (SomeCommand <$> parser) $ progDesc desc

@@ -1,11 +1,11 @@
 module PatHs.Config where
 
-import           Control.Arrow   ((***))
+import Control.Arrow ((***))
 import qualified Data.Map.Strict as Map
-import           Data.Text       (Text)
-import qualified Data.Text       as Text
-import           PatHs.Parser
-import           PatHs.Types
+import Data.Text (Text)
+import qualified Data.Text as Text
+import PatHs.Parser
+import PatHs.Types
 
 type Config = [(Key, Value)]
 
