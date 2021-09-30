@@ -1,12 +1,12 @@
 {-# LANGUAGE GADTs #-}
 
--- module PatHs.Options.Complete(mkCompleter', keyCompleter, goPathCompleter) where
-module PatHs.Options.Complete where
+module PatHs.Options.Complete(mkCompleter', keyCompleter, goPathCompleter) where
 
 import           Control.Monad.IO.Class     (liftIO)
 import           Control.Monad.Trans.Except (except)
 import           Data.Either                (fromRight)
 import           Data.List                  (isPrefixOf)
+import           Data.List.Extra            (notNull)
 import qualified Data.Map.Strict            as Map
 import           Options.Applicative        (Completer, bashCompleter,
                                              mkCompleter)
@@ -32,13 +32,14 @@ keyCompleter str = do
 goPathCompleter :: MyCompleter
 goPathCompleter str = do
   let (key, goPath) = parseGoPath str
-  marks <- loadMarks
-  (RTList marks) <- except $ list CList marks
-  let matchingMarks = filter (isPrefixOf (unKey key) . unValidKey . fst) $ Map.toList marks
-  case matchingMarks of
-    []            -> pure []
-    [mark]        -> liftIO $ completeSingleMark mark goPath
-    matchingMarks -> pure $ unValidKey . fst <$> matchingMarks
+  if null (unKey key) && notNull (unGoPath goPath) then pure [] else do
+    marks <- loadMarks
+    (RTList marks) <- except $ list CList marks
+    let matchingMarks = filter (isPrefixOf (unKey key) . unValidKey . fst) $ Map.toList marks
+    case matchingMarks of
+      []            -> pure []
+      [mark]        -> liftIO $ completeSingleMark mark goPath
+      matchingMarks -> pure $ unValidKey . fst <$> matchingMarks
 
 completeSingleMark :: (ValidKey, Value) -> GoPath -> IO [String]
 completeSingleMark mark goPath = if null (unGoPath goPath)
@@ -53,7 +54,6 @@ completeSingleMark mark goPath = if null (unGoPath goPath)
       fmap ((key </>) . makeRelative value) <$> case dirs of
         [dir] -> do
           newCompletions <- completeDirectory $ addTrailingPathSeparator $ value </> dir
-          print newCompletions
           pure $ addTrailingPathSeparator dir : newCompletions
         dirs -> pure dirs
 
