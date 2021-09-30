@@ -31,17 +31,20 @@ keyCompleter str = do
   pure $ filter (isPrefixOf str) $ unValidKey <$> Map.keys marks
 
 goPathCompleter :: MyCompleter
-goPathCompleter str = do
-  let goPath = mkGoPath str
-  if null (unKey $ key goPath) && notNull (path goPath) then pure [] else do
-    marks <- loadMarks
-    (RTList marks) <- except $ list CList marks
-    let filterMarks fn = filter (fn . unValidKey . fst) $ Map.toList marks
-    let matchingMarks = filterMarks $ isPrefixOf $ unKey $ key goPath
-    let exactMatch = listToMaybe $ filterMarks (== unKey (key goPath))
-    case (length matchingMarks == 1 || notNull (path goPath), exactMatch) of
-      (True, Just mark) -> liftIO $ completeSingleMark mark goPath
-      _   -> pure $ addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
+goPathCompleter str =
+  if null (unKey $ key goPath) && notNull (path goPath)
+    then pure []
+    else do
+      marks <- loadMarks
+      (RTList marks) <- except $ list CList marks
+      let matchingMarks = filterMarks (isPrefixOf $ unKey $ key goPath) marks
+      let exactMatch = listToMaybe $ filterMarks (== unKey (key goPath)) marks
+      case (length matchingMarks == 1 || notNull (path goPath), exactMatch) of
+        (True, Just mark) -> liftIO $ completeSingleMark mark goPath
+        _   -> pure $ addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
+  where
+    goPath = mkGoPath str
+    filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
 completeSingleMark :: (ValidKey, Value) -> GoPath -> IO [String]
 completeSingleMark mark goPath = resolveDirs mark goPath `catchIOError` const (pure [])
