@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-dir="/usr/lib"
+dir="/usr/share/paths"
 
-pat-hs() {
+paths() {
   if [ $1 = "go" ]; then
-    cd "$(paths-exe go $2)";
+    cd "$(\"$dir/paths-exe\" go $2)";
   else
-    paths-exe "$@";
+    "$dir/paths-exe" "$@";
   fi
 }
 
