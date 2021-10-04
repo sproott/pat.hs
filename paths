@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+dir="/usr/lib"
+
+pat-hs() {
+  if [ $1 = "go" ]; then
+    cd "$(paths-exe go $2)";
+  else
+    paths-exe "$@";
+  fi
+}
+
+complete -o filenames -F _paths-exe paths
