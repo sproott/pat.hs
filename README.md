@@ -22,11 +22,10 @@ CLI utility for saving often used directories under a short name
 
 ## 👷 Building
 
-### ❗ Does not work yet, package is not published to AUR</p>
 
 ```sh
-git clone https://aur.archlinux.org/paths-bookmarks.git
-cd paths-bookmarks
+git clone https://aur.archlinux.org/paths-bookmarks-git.git
+cd paths-bookmarks-git
 makepkg -si
 ```
 
