@@ -6,13 +6,13 @@ cabal-version: 1.12
 
 name:           paths-bookmarks
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/pat-hs#readme>
-homepage:       https://github.com/sproott/paths#readme
-bug-reports:    https://github.com/sproott/paths/issues
+description:    Please see the README on GitHub at <https://github.com/sproott/pat.hs#readme>
+homepage:       https://github.com/sproott/pat.hs#readme
+bug-reports:    https://github.com/sproott/pat.hs/issues
 author:         sproott
 maintainer:     david.hrabe12@seznam.cz
 copyright:      2021 sproott
-license:        MIT
+license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/pat-hs
+  location: https://github.com/sproott/pat.hs
 
 library
   exposed-modules:
@@ -35,7 +35,7 @@ library
       PatHs.Types
       System.FilePath.Text
   other-modules:
-      Paths_pat_hs
+      Paths_paths_bookmarks
   hs-source-dirs:
       src
   default-extensions:
@@ -59,7 +59,7 @@ library
 executable paths-exe
   main-is: Main.hs
   other-modules:
-      Paths_pat_hs
+      Paths_paths_bookmarks
   hs-source-dirs:
       app
   default-extensions:
@@ -74,7 +74,7 @@ executable paths-exe
     , filepath
     , megaparsec
     , optparse-applicative
-    , pat-hs
+    , paths-bookmarks
     , prettyprinter
     , prettyprinter-ansi-terminal
     , safe
@@ -86,7 +86,7 @@ test-suite paths-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_pat_hs
+      Paths_paths_bookmarks
   hs-source-dirs:
       test
   default-extensions:
@@ -101,7 +101,7 @@ test-suite paths-test
     , filepath
     , megaparsec
     , optparse-applicative
-    , pat-hs
+    , paths-bookmarks
     , prettyprinter
     , prettyprinter-ansi-terminal
     , safe
