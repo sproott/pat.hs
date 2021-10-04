@@ -11,7 +11,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (except)
 import Data.Either (fromRight)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe, isJust, listToMaybe)
+import Data.Maybe (isJust, listToMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Options.Applicative
@@ -26,7 +26,6 @@ import PatHs.Parser (parse, splitGoPath)
 import PatHs.Types
 import System.FilePath.Text
   ( addTrailingPathSeparator,
-    makeRelative,
     (</>),
   )
 import System.IO.Error (catchIOError)
@@ -45,7 +44,6 @@ keyCompleter str = do
 
 goPathCompleter :: MyCompleter
 goPathCompleter str = do
-  -- TODO don't break if key is empty
   (keyStr, goPathStr) <- except $ parse InvalidGoPath splitGoPath str
   marks <- loadMarks
   case keyStr of
@@ -54,7 +52,10 @@ goPathCompleter str = do
       (RTList marks) <- except $ list CList marks
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (Text.isPrefixOf keyStr) marks
-      let exactMatch = listToMaybe $ filterMarks (== keyStr) marks
+      let exactMatch =
+            if length matchingMarks == 1
+              then pure $ head matchingMarks
+              else listToMaybe $ filterMarks (== keyStr) marks
       case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
         (True, Just mark) -> liftIO $ completeSingleMark mark goPath
         _ -> pure $ completeMarks matchingMarks
@@ -70,14 +71,22 @@ completeSingleMark mark goPath =
     key = unValidKey $ fst mark
     resolveDirs mark goPath = do
       homeDir <- getHomeDirectory'
+
       let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-      dirs <- completeDirectory $ value <> fromMaybe mempty (path goPath)
-      fmap ((key </>) . makeRelative value) <$> case dirs of
+      let fullPath = case path goPath of
+            Just goPathStr -> value </> goPathStr
+            Nothing -> value
+
+      dirs <- completeDirectory fullPath
+      fmap (replaceWithMark key value) <$> case dirs of
         [dir] -> do
           newCompletions <-
             completeDirectory $ addTrailingPathSeparator $ value </> dir
           pure $ addTrailingPathSeparator dir : newCompletions
         dirs -> pure dirs
+
+    replaceWithMark :: Text -> Text -> Text -> Text
+    replaceWithMark key value path = (key <>) $ Text.drop (Text.length value) path
 
 completeDirectory :: Text -> IO [Text]
 completeDirectory =
