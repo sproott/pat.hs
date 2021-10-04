@@ -1,15 +1,3 @@
-#!/usr/bin/env bash
-
-dir="/usr/share/paths"
-
-paths() {
-  if [ $1 = "go" ]; then
-    cd "$(\"$dir/paths-exe\" go $2)";
-  else
-    "$dir/paths-exe" "$@";
-  fi
-}
-
 _paths() {
   local CMDLINE
   local IFS=$'\n'
