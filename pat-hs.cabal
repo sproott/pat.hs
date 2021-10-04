@@ -31,6 +31,7 @@ library
       PatHs.Options
       PatHs.Options.Complete
       PatHs.Parser
+      PatHs.Render
       PatHs.Types
       System.FilePath.Text
   other-modules:
@@ -48,6 +49,9 @@ library
     , filepath
     , megaparsec
     , optparse-applicative
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , safe
     , text >=1.2.5.0
     , transformers
   default-language: Haskell2010
@@ -71,6 +75,9 @@ executable pat-hs-exe
     , megaparsec
     , optparse-applicative
     , pat-hs
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , safe
     , text >=1.2.5.0
     , transformers
   default-language: Haskell2010
@@ -95,6 +102,9 @@ test-suite pat-hs-test
     , megaparsec
     , optparse-applicative
     , pat-hs
+    , prettyprinter
+    , prettyprinter-ansi-terminal
+    , safe
     , text >=1.2.5.0
     , transformers
   default-language: Haskell2010

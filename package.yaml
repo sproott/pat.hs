@@ -28,6 +28,9 @@ dependencies:
   - filepath
   - megaparsec
   - optparse-applicative
+  - prettyprinter
+  - prettyprinter-ansi-terminal
+  - safe
   - text >= 1.2.5.0
   - transformers
 

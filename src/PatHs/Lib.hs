@@ -16,7 +16,9 @@ import qualified Data.Text.IO as TextIO
 import PatHs.Config
 import PatHs.Lib.Command
 import PatHs.Parser
+import PatHs.Render
 import PatHs.Types
+import Prettyprinter.Render.Terminal (putDoc)
 import System.IO.Error (catchIOError)
 
 loadMarks :: AppM Marks
@@ -49,13 +51,13 @@ consumeResult _ (RTSave marks) = saveMarks marks
 consumeResult _ (RTDelete marks) = saveMarks marks
 consumeResult _ (RTGet value) = do
   homeDir <- getHomeDirectory'
-  putStrLn $ Text.unpack $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value
+  putDoc $ renderResolvedValue $ resolveToHomeDir homeDir $ unValue value
 consumeResult _ (RTGo value) = do
   homeDir <- getHomeDirectory'
   TextIO.putStrLn $ unResolvedValue value
 consumeResult _ (RTList marks) = do
   homeDir <- getHomeDirectory'
-  mapM_ TextIO.putStrLn $ showMarks $ resolveMarks homeDir marks
+  putDoc $ renderMarks $ resolveMarks homeDir marks
 
 saveMarks :: Marks -> IO ()
 saveMarks marks = do
