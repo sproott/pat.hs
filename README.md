@@ -20,13 +20,28 @@ CLI utility for saving often used directories under a short name
   - Changes the working directory to the one associated with `KEY`
   - Also goes into subdirectories specified with `PATH`
 
+## 💾 Installation
+
+- Available for Arch Linux only
+- For other distributions, see the [building](#-building) section
+- Install `paths-bookmarks-git` using your favorite AUR helper
+
 ## 👷 Building
+
+Haskell Stack needs to be installed and on the path to install manually.
 
 
 ```sh
-git clone https://aur.archlinux.org/paths-bookmarks-git.git
-cd paths-bookmarks-git
-makepkg -si
+git clone https://github.com/sproott/pat.hs.git
+cd pat.hs
+
+mkdir bin
+stack --local-bin-dir "bin/" install 
+
+install -Dm755 "bin/paths-exe" "/usr/share/paths/paths-exe"
+install -Dm755 "paths.sh" "/usr/share/paths/paths.sh"
+
+install -Dm644 "doc/completions/bashcompletion.sh" "/usr/share/bash-completion/completions/paths"
 ```
 
 Then add the following line to your .bashrc:
