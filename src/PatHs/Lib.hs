@@ -27,7 +27,7 @@ loadMarks = do
   except $ Map.fromList <$> convertKeys validateKey config
 
 configPath :: HomeDir -> String
-configPath homeDir = Text.unpack (unHomeDir homeDir) <> "/.pat-hs"
+configPath homeDir = Text.unpack (unHomeDir homeDir) <> "/.paths-bookmarks"
 
 loadConfig :: AppM Config
 loadConfig = do
