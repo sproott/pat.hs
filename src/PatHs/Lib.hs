@@ -1,8 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE RankNTypes #-}
 
 module PatHs.Lib where
 
@@ -66,7 +63,7 @@ runPatHs marks command = do
   result <- except $ runCommand command marks
   consumeResult command result
 
-consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> AppM ()
+consumeResult :: Command c -> ReturnType c -> AppM ()
 consumeResult _ (RTSave marks) = saveConfig marks
 consumeResult _ (RTDelete marks) = saveConfig marks
 consumeResult _ (RTGet value) = liftIO $ do
