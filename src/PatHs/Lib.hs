@@ -37,10 +37,13 @@ getConfigPath = do
 
 loadConfig :: AppM Config
 loadConfig = do
-  homeDir <- liftIO getHomeDirectory'
-  liftIO $ createDirectoryIfMissing True =<< getConfigDir
-  configPath <- liftIO getConfigPath
-  !contents <- liftIO $ TextIO.readFile configPath `catchIOError` const (pure "")
+  let safeIO' = safeIO (ConfigError CERead)
+  homeDir <- safeIO' getHomeDirectory'
+  contents <- safeIO' $ do
+    createDirectoryIfMissing True =<< getConfigDir
+    configPath <- getConfigPath
+    !contents <- TextIO.readFile configPath `catchIOError` const (pure "")
+    pure contents
   except $ parseConfig homeDir contents
 
 saveConfig :: Marks -> AppM ()
