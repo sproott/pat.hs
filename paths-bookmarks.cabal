@@ -54,6 +54,7 @@ library
     , safe
     , text >=1.2.5.0
     , transformers
+    , unix
   default-language: Haskell2010
 
 executable paths-exe
@@ -80,6 +81,7 @@ executable paths-exe
     , safe
     , text >=1.2.5.0
     , transformers
+    , unix
   default-language: Haskell2010
 
 test-suite paths-test
@@ -107,4 +109,5 @@ test-suite paths-test
     , safe
     , text >=1.2.5.0
     , transformers
+    , unix
   default-language: Haskell2010

@@ -20,6 +20,7 @@ import PatHs.Render
 import PatHs.Types
 import Prettyprinter.Render.Terminal (putDoc)
 import System.IO.Error (catchIOError)
+import System.Posix (queryTerminal, stdOutput)
 
 loadMarks :: AppM Marks
 loadMarks = do
@@ -51,7 +52,12 @@ consumeResult _ (RTSave marks) = saveMarks marks
 consumeResult _ (RTDelete marks) = saveMarks marks
 consumeResult _ (RTGet value) = do
   homeDir <- getHomeDirectory'
-  putDoc $ renderResolvedValue $ resolveToHomeDir homeDir $ unValue value
+  interactive <- isInteractive
+  ( if interactive
+      then putDoc . renderResolvedValue
+      else putStr . Text.unpack . unResolvedValue
+    )
+    $ resolveToHomeDir homeDir $ unValue value
 consumeResult _ (RTGo value) = do
   homeDir <- getHomeDirectory'
   TextIO.putStrLn $ unResolvedValue value
@@ -71,3 +77,6 @@ showMarks marks = uncurry printTuple <$> Map.toList marks
 
 resolveMarks :: HomeDir -> Marks -> ResolvedMarks
 resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)
+
+isInteractive :: IO Bool
+isInteractive = queryTerminal stdOutput

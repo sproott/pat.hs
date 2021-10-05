@@ -33,6 +33,7 @@ dependencies:
   - safe
   - text >= 1.2.5.0
   - transformers
+  - unix
 
 default-extensions:
   - OverloadedStrings
