@@ -7,7 +7,7 @@
 module PatHs.Lib where
 
 import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (except)
+import Control.Monad.Trans.Except (ExceptT (ExceptT), except)
 import Data.Bitraversable (bitraverse)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
@@ -19,6 +19,9 @@ import PatHs.Parser
 import PatHs.Render
 import PatHs.Types
 import Prettyprinter.Render.Terminal (putDoc)
+import System.Directory (createDirectoryIfMissing)
+import System.Environment.XDG.BaseDir (getUserDataDir)
+import System.FilePath ((</>))
 import System.IO.Error (catchIOError)
 import System.Posix (queryTerminal, stdOutput)
 
@@ -27,17 +30,33 @@ loadMarks = do
   config <- loadConfig
   except $ Map.fromList <$> convertKeys validateKey config
 
-configPath :: HomeDir -> String
-configPath homeDir = Text.unpack (unHomeDir homeDir) <> "/.paths-bookmarks"
+getConfigDir :: IO FilePath
+getConfigDir = getUserDataDir "paths"
+
+getConfigPath :: IO FilePath
+getConfigPath = do
+  dir <- getConfigDir
+  pure $ dir </> ".bookmarks"
 
 loadConfig :: AppM Config
 loadConfig = do
   homeDir <- liftIO getHomeDirectory'
-  !contents <- liftIO $ TextIO.readFile (configPath homeDir) `catchIOError` const (pure "")
+  liftIO $ createDirectoryIfMissing True =<< getConfigDir
+  configPath <- liftIO getConfigPath
+  !contents <- liftIO $ TextIO.readFile configPath `catchIOError` const (pure "")
   except $ parseConfig homeDir contents
 
+saveConfig :: Marks -> AppM ()
+saveConfig marks = safeIO (ConfigError CEWrite) $ do
+  homeDir <- getHomeDirectory'
+  configPath <- getConfigPath
+  TextIO.writeFile configPath $ marksToConfigString marks
+
+safeIO :: Error -> IO a -> AppM a
+safeIO err action = ExceptT $ (Right <$> action) `catchIOError` const (pure $ Left err)
+
 parseConfig :: HomeDir -> Text -> Either Error Config
-parseConfig homeDir = parse InvalidConfig (configParser homeDir)
+parseConfig homeDir = parse (ConfigError CEInvalid) (configParser homeDir)
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
@@ -45,12 +64,12 @@ convertKeys f = traverse $ bitraverse f pure
 runPatHs :: Marks -> Command c -> AppM ()
 runPatHs marks command = do
   result <- except $ runCommand command marks
-  liftIO $ consumeResult command result
+  consumeResult command result
 
-consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> IO ()
-consumeResult _ (RTSave marks) = saveMarks marks
-consumeResult _ (RTDelete marks) = saveMarks marks
-consumeResult _ (RTGet value) = do
+consumeResult :: forall (c :: CommandType). Command c -> ReturnType c -> AppM ()
+consumeResult _ (RTSave marks) = saveConfig marks
+consumeResult _ (RTDelete marks) = saveConfig marks
+consumeResult _ (RTGet value) = liftIO $ do
   homeDir <- getHomeDirectory'
   interactive <- isInteractive
   ( if interactive
@@ -58,17 +77,12 @@ consumeResult _ (RTGet value) = do
       else putStr . Text.unpack . unResolvedValue
     )
     $ resolveToHomeDir homeDir $ unValue value
-consumeResult _ (RTGo value) = do
+consumeResult _ (RTGo value) = liftIO $ do
   homeDir <- getHomeDirectory'
   TextIO.putStrLn $ unResolvedValue value
-consumeResult _ (RTList marks) = do
+consumeResult _ (RTList marks) = liftIO $ do
   homeDir <- getHomeDirectory'
   putDoc $ renderMarks $ resolveMarks homeDir marks
-
-saveMarks :: Marks -> IO ()
-saveMarks marks = do
-  homeDir <- getHomeDirectory'
-  TextIO.writeFile (configPath homeDir) $ marksToConfigString marks
 
 showMarks :: ResolvedMarks -> [Text]
 showMarks marks = uncurry printTuple <$> Map.toList marks

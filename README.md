@@ -14,7 +14,7 @@ CLI utility for saving often used directories under a short name
   - Prints the path associated with the given `KEY`
 
 `paths delete KEY`
-  - Deletes the `KEY` and its associated value from the [config file](#config-file)
+  - Deletes the `KEY` and its associated value from the [bookmarks file](#-bookmarks-file)
 
 `paths go KEY[/PATH]` 
   - Changes the working directory to the one associated with `KEY`
@@ -50,7 +50,7 @@ Then add the following line to your .bashrc:
 source /usr/share/paths/paths.sh
 ```
 
-## 🔧 Config file
+## 🔧 Bookmarks file
 
-- pat.hs stores the bookmarks in `$HOME/.paths-bookmarks`
+- pat.hs stores the bookmarks in a `.bookmarks` file inside `$XDG_DATA_HOME/paths` or inside `$HOME/.local/share/paths`, if `$XDG_DATA_HOME` is not defined
 - You can make direct edits to it, but if you break the format, the program will not launch until you fix it again

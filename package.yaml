@@ -34,6 +34,7 @@ dependencies:
   - text >= 1.2.5.0
   - transformers
   - unix
+  - xdg-basedir
 
 default-extensions:
   - OverloadedStrings

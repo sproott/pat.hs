@@ -17,6 +17,7 @@ module PatHs.Types
     SomeCommand (..),
     ReturnType (..),
     Error (..),
+    ConfigError (..),
     getHomeDirectory',
     validateKey,
     resolveToHomeDir,
@@ -83,7 +84,9 @@ deriving instance Eq (ReturnType c)
 
 deriving instance Show (ReturnType c)
 
-data Error = InvalidConfig | InvalidGoPath | ConfigNotExists | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
+data Error = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
+
+data ConfigError = CERead | CEWrite | CEInvalid deriving (Eq, Show)
 
 getHomeDirectory' :: IO HomeDir
 getHomeDirectory' = HomeDir . Text.pack <$> getHomeDirectory

@@ -14,9 +14,10 @@ renderError :: HomeDir -> Error -> Doc AnsiStyle
 renderError homeDir = annotate (colorDull Red) . convertError
   where
     convertError :: Error -> Doc a
-    convertError InvalidConfig = "Invalid config"
+    convertError (ConfigError CEInvalid) = "Invalid config"
+    convertError (ConfigError CEWrite) = "Error writing config file"
+    convertError (ConfigError CERead) = "Error reading config file"
     convertError InvalidGoPath = "Invalid go path"
-    convertError ConfigNotExists = "Config does not exist"
     convertError (AlreadyExists key value) = "Key " <> dquotes (pretty $ unKey key) <> " is already mapped to value " <> dquotes (pretty $ unResolvedValue $ resolveToHomeDir homeDir $ unValue value)
     convertError (MalformedKey key) = "Malformed key " <> dquotes (pretty $ unKey key)
     convertError (NotExists key) = "Key " <> dquotes (pretty $ unKey key) <> " does not exist"
