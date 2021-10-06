@@ -57,3 +57,7 @@ source /usr/share/paths/paths.sh
 
 - pat.hs stores the bookmarks in a `.bookmarks` file inside `$XDG_DATA_HOME/paths` or inside `$HOME/.local/share/paths`, if `$XDG_DATA_HOME` is not defined
 - You can make direct edits to it, but if you break the format, the program will not launch until you fix it again
+
+## 🍲 Recipes
+
+For some usage tips, see [recipes](doc/recipes/)
