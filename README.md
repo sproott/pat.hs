@@ -41,7 +41,7 @@ cd pat.hs
 mkdir bin
 stack --local-bin-dir "bin/" install 
 
-install -Dm755 "bin/paths-exe" "/usr/share/paths/paths-exe"
+install -Dm755 "bin/paths" "/usr/share/paths/paths"
 install -Dm755 "paths.sh" "/usr/share/paths/paths.sh"
 
 install -Dm644 "doc/completions/bashcompletion.sh" "/usr/share/bash-completion/completions/paths"
