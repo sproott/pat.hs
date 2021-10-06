@@ -7,7 +7,7 @@ _paths() {
       CMDLINE=(${CMDLINE[@]} --bash-completion-word $arg)
   done
 
-  COMPREPLY=( $(/usr/share/paths/paths-exe "${CMDLINE[@]}") )
+  COMPREPLY=( $(/usr/share/paths/paths "${CMDLINE[@]}") )
 }
 
 complete -o filenames -F _paths paths
