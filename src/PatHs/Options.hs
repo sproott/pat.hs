@@ -14,7 +14,7 @@ commandP homeDir currentDirectory =
     (commandParser homeDir currentDirectory <**> helper)
     ( fullDesc
         <> progDesc "Save often used directories like bookmarks"
-        <> header "pat-hs - a terminal directory bookmark utility"
+        <> header "pat.hs - a terminal directory bookmark utility"
     )
 
 commandParser :: HomeDir -> Value -> Parser SomeCommand

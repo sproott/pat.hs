@@ -58,7 +58,7 @@ library
     , xdg-basedir
   default-language: Haskell2010
 
-executable paths-exe
+executable paths
   main-is: Main.hs
   other-modules:
       Paths_paths_bookmarks

@@ -43,7 +43,7 @@ library:
   source-dirs: src
 
 executables:
-  paths-exe:
+  paths:
     main: Main.hs
     source-dirs: app
     ghc-options:

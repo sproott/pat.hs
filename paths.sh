@@ -4,8 +4,8 @@ dir="/usr/share/paths"
 
 paths() {
   if [ $1 = "go" ]; then
-    cd "$($dir/paths-exe go $2)";
+    cd "$($dir/paths go $2)";
   else
-    $dir/paths-exe "$@";
+    $dir/paths "$@";
   fi
 }
