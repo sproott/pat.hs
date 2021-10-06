@@ -22,6 +22,7 @@ commandParser homeDir currentDirectory =
   subparser
     ( command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
         <> command "delete" (mkCommand deleteP "Delete bookmark")
+        <> command "rename" (mkCommand renameP "Rename bookmark")
         <> command "get" (mkCommand getP "Get bookmark")
         <> command "go" (mkCommand (goP homeDir) "Go to a directory related to bookmark")
         <> command "list" (mkCommand listP "List all bookmarks")
@@ -35,6 +36,9 @@ saveP currentDirectory = CSave <$> keyP False <*> pure currentDirectory
 
 deleteP :: Parser (Command 'Delete)
 deleteP = CDelete <$> keyP True
+
+renameP :: Parser (Command 'Rename)
+renameP = CRename <$> keyP True <*> (Key <$> argument str (metavar "NEW_KEY"))
 
 getP :: Parser (Command 'Get)
 getP = CGet <$> keyP True

@@ -69,6 +69,7 @@ runPatHs marks command = do
 consumeResult :: Command c -> ReturnType c -> AppM ()
 consumeResult _ (RTSave marks) = saveConfig marks
 consumeResult _ (RTDelete marks) = saveConfig marks
+consumeResult _ (RTRename marks) = saveConfig marks
 consumeResult _ (RTGet value) = liftIO $ do
   homeDir <- getHomeDirectory'
   interactive <- isInteractive

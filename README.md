@@ -16,6 +16,9 @@ CLI utility for saving often used directories under a short name
 `paths delete KEY`
   - Deletes the `KEY` and its associated value from the [bookmarks file](#-bookmarks-file)
 
+`paths rename KEY NEW_KEY`
+  - Renames the bookmark associated with `KEY` to `NEW_KEY`
+
 `paths go KEY[/PATH]` 
   - Changes the working directory to the one associated with `KEY`
   - Also goes into subdirectories specified with `PATH`

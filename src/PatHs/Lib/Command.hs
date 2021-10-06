@@ -25,6 +25,13 @@ delete (CDelete key) marks = do
   validKey <- validateKey key
   pure $ RTDelete $ Map.delete validKey marks
 
+rename :: ExecCommand Rename
+rename (CRename key newKey) marks = do
+  value <- get' (CGet key) marks
+  validKey <- validateKey key
+  validNewKey <- validateKey newKey
+  pure $ RTRename $ Map.insert validNewKey value $ Map.delete validKey marks
+
 get :: ExecCommand Get
 get command marks = RTGet <$> get' command marks
 
@@ -47,6 +54,7 @@ list CList = pure . RTList
 runCommand :: ExecCommand c
 runCommand command@CSave {} = save command
 runCommand command@CDelete {} = delete command
+runCommand command@CRename {} = rename command
 runCommand command@CGet {} = get command
 runCommand command@CGo {} = go command
 runCommand command@CList = list command

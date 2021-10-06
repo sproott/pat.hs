@@ -56,13 +56,14 @@ type Marks = Map ValidKey Value
 
 type ResolvedMarks = Map ValidKey ResolvedValue
 
-data CommandType = Save | Delete | Get | List | Go
+data CommandType = Save | Delete | Rename | Get | Go | List
 
 newtype HomeDir = HomeDir {unHomeDir :: Text} deriving (Eq, Show)
 
 data Command (c :: CommandType) where
   CSave :: Key -> Value -> Command Save
   CDelete :: Key -> Command Delete
+  CRename :: Key -> Key -> Command Rename
   CGet :: Key -> Command Get
   CGo :: HomeDir -> Maybe GoPath -> Command Go
   CList :: Command List
@@ -76,6 +77,7 @@ data SomeCommand = forall (c :: CommandType). SomeCommand (Command c)
 data ReturnType (c :: CommandType) where
   RTSave :: Marks -> ReturnType Save
   RTDelete :: Marks -> ReturnType Delete
+  RTRename :: Marks -> ReturnType Rename
   RTGet :: Value -> ReturnType Get
   RTGo :: ResolvedValue -> ReturnType Go
   RTList :: Marks -> ReturnType List
