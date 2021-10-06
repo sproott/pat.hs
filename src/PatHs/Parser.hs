@@ -20,7 +20,7 @@ type Parser = Parsec Void Text
 ident :: Parser Text
 ident = do
   c <- letterChar <|> char '_'
-  cs <- many (alphaNumChar <|> char '_')
+  cs <- many (alphaNumChar <|> char '_' <|> char '-')
   pure $ Text.pack (c : cs)
 
 line :: Parser (Text, Text)
