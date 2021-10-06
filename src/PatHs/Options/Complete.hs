@@ -83,7 +83,7 @@ completeSingleMark mark goPath =
           newCompletions <-
             completeDirectory $ addTrailingPathSeparator $ value </> dir
           pure $ addTrailingPathSeparator dir : newCompletions
-        dirs -> pure $ fullPath : dirs
+        dirs -> pure dirs
 
     replaceWithMark :: Text -> Text -> Text -> Text
     replaceWithMark key value path = (key <>) $ Text.drop (Text.length value) path
