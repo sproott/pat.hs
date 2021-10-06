@@ -97,18 +97,17 @@ validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof)
 homeDirVariable :: Text
 homeDirVariable = "$HOME"
 
+replaceLeadingString :: Text -> Text -> Text -> Text
+replaceLeadingString search replace text =
+  if search `isPrefixOf` text
+    then replace <> Text.drop (Text.length search) text
+    else text
+
 resolveToHomeDir :: HomeDir -> Text -> ResolvedValue
-resolveToHomeDir (HomeDir homeDir) path =
-  ResolvedValue $
-    if homeDirVariable `isPrefixOf` path
-      then homeDir <> Text.drop (Text.length homeDirVariable) path
-      else path
+resolveToHomeDir (HomeDir homeDir) = ResolvedValue . replaceLeadingString homeDirVariable homeDir
 
 unResolveToHomeDir :: HomeDir -> Text -> Value
-unResolveToHomeDir (HomeDir homeDir) path =
-  if homeDir `isPrefixOf` path
-    then Value $ homeDirVariable <> Text.drop (Text.length homeDir) path
-    else Value path
+unResolveToHomeDir (HomeDir homeDir) = Value . replaceLeadingString homeDir homeDirVariable
 
 mkGoPath :: Text -> Either Error GoPath
 mkGoPath param = do
