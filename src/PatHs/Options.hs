@@ -38,13 +38,13 @@ deleteP :: Parser (Command 'Delete)
 deleteP = CDelete <$> keyP True
 
 renameP :: Parser (Command 'Rename)
-renameP = CRename <$> keyP True <*> (Key <$> argument str (metavar "NEW_KEY"))
+renameP = CRename <$> keyP True <*> (Key <$> strArgument (metavar "NEW_KEY"))
 
 getP :: Parser (Command 'Get)
 getP = CGet <$> keyP True
 
 goP :: HomeDir -> Parser (Command 'Go)
-goP homeDir = mkCGo homeDir <$> argument str (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
+goP homeDir = mkCGo homeDir <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
 
 mkCGo :: HomeDir -> Text -> Command 'Go
 mkCGo homeDir str = CGo homeDir $ eitherToMaybe $ mkGoPath str
@@ -53,4 +53,4 @@ listP :: Parser (Command 'List)
 listP = pure CList
 
 keyP :: Bool -> Parser Key
-keyP addCompleter = Key <$> argument str (metavar "KEY" <> if addCompleter then completer (mkCompleter' keyCompleter) else mempty)
+keyP addCompleter = Key <$> strArgument (metavar "KEY" <> if addCompleter then completer (mkCompleter' keyCompleter) else mempty)
