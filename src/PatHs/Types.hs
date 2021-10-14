@@ -101,9 +101,9 @@ homeDirVariable = "$HOME"
 
 replaceLeadingString :: Text -> Text -> Text -> Text
 replaceLeadingString search replace text =
-  if search `isPrefixOf` text
-    then replace <> Text.drop (Text.length search) text
-    else text
+  case Text.stripPrefix search text of
+    Just suffix -> replace <> suffix
+    _ -> text
 
 resolveToHomeDir :: HomeDir -> Text -> ResolvedValue
 resolveToHomeDir (HomeDir homeDir) = ResolvedValue . replaceLeadingString homeDirVariable homeDir
