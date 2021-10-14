@@ -1,10 +1,8 @@
 module PatHs.Parser where
 
-import Control.Applicative (empty, (<|>))
 import Control.Arrow (left)
-import Data.Text (Text)
 import qualified Data.Text as Text
-import Data.Void (Void)
+import Relude hiding (many, optional)
 import System.FilePath (pathSeparator)
 import Text.Megaparsec (Parsec, many, optional, runParser)
 import Text.Megaparsec.Char

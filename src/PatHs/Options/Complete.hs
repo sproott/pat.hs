@@ -7,12 +7,8 @@ module PatHs.Options.Complete
   )
 where
 
-import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except (except)
-import Data.Either (fromRight)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (isJust, listToMaybe)
-import Data.Text (Text)
 import qualified Data.Text as Text
 import Options.Applicative
   ( Completer,
@@ -25,6 +21,7 @@ import PatHs.Lib.Command
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser (parse, splitGoPath)
 import PatHs.Types
+import Relude
 import System.FilePath.Text
   ( addTrailingPathSeparator,
     (</>),
@@ -53,10 +50,7 @@ goPathCompleter str = do
       (RTList marks) <- except $ list CList marks
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (Text.isPrefixOf keyStr) marks
-      let exactMatch =
-            if length matchingMarks == 1
-              then pure $ head matchingMarks
-              else listToMaybe $ filterMarks (== keyStr) marks
+      let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)
       case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
         (True, Just mark) -> liftIO $ completeSingleMark mark goPath
         _ -> pure $ completeMarks matchingMarks

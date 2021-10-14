@@ -40,6 +40,7 @@ library
   hs-source-dirs:
       src
   default-extensions:
+      NoImplicitPrelude
       OverloadedStrings
   build-depends:
       base >=4.7 && <5
@@ -52,8 +53,9 @@ library
     , optparse-applicative
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , relude
     , safe
-    , text >=1.2.5.0
+    , text
     , transformers
     , unix
     , xdg-basedir
@@ -66,6 +68,7 @@ executable paths
   hs-source-dirs:
       app
   default-extensions:
+      NoImplicitPrelude
       OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports
   build-depends:
@@ -80,8 +83,9 @@ executable paths
     , paths-bookmarks
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , relude
     , safe
-    , text >=1.2.5.0
+    , text
     , transformers
     , unix
     , xdg-basedir
@@ -95,6 +99,7 @@ test-suite paths-test
   hs-source-dirs:
       test
   default-extensions:
+      NoImplicitPrelude
       OverloadedStrings
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
@@ -109,8 +114,9 @@ test-suite paths-test
     , paths-bookmarks
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , relude
     , safe
-    , text >=1.2.5.0
+    , text
     , transformers
     , unix
     , xdg-basedir

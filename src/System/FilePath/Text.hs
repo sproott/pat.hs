@@ -7,9 +7,8 @@ module System.FilePath.Text
   )
 where
 
-import Data.Function (on)
-import Data.Text (Text)
 import qualified Data.Text as Text
+import Relude
 import qualified System.FilePath as FP
 
 convert :: (FilePath -> FilePath) -> Text -> Text

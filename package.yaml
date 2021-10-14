@@ -30,13 +30,15 @@ dependencies:
   - optparse-applicative
   - prettyprinter
   - prettyprinter-ansi-terminal
+  - relude
   - safe
-  - text >= 1.2.5.0
+  - text
   - transformers
   - unix
   - xdg-basedir
 
 default-extensions:
+  - NoImplicitPrelude
   - OverloadedStrings
 
 library:

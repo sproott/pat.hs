@@ -3,10 +3,10 @@
 module PatHs.Options (commandP) where
 
 import Data.Either.Extra (eitherToMaybe)
-import Data.Text (Text)
 import Options.Applicative
 import PatHs.Options.Complete
 import PatHs.Types
+import Relude
 
 commandP :: HomeDir -> Value -> ParserInfo SomeCommand
 commandP homeDir currentDirectory =

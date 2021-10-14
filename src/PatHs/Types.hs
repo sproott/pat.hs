@@ -28,13 +28,10 @@ module PatHs.Types
   )
 where
 
-import Control.Monad.Trans.Except (ExceptT, runExceptT)
-import Data.Either.Combinators (maybeToRight)
-import Data.Map.Strict (Map)
-import Data.Text (Text, isPrefixOf)
 import qualified Data.Text as Text
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser
+import Relude
 import System.Directory (getHomeDirectory)
 import Text.Megaparsec (MonadParsec (eof))
 

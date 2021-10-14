@@ -6,8 +6,8 @@ module PatHs.Lib.Command where
 
 import Data.Either.Extra (maybeToEither)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe)
 import PatHs.Types
+import Relude hiding (get)
 import System.FilePath.Text (dropTrailingPathSeparator, (</>))
 
 type ExecCommand (c :: CommandType) = Command c -> Marks -> Either Error (ReturnType c)

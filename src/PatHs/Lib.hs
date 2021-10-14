@@ -3,11 +3,8 @@
 
 module PatHs.Lib where
 
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad.Trans.Except (ExceptT (ExceptT), except)
-import Data.Bitraversable (bitraverse)
+import Control.Monad.Trans.Except (except)
 import qualified Data.Map.Strict as Map
-import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import PatHs.Config
@@ -16,6 +13,7 @@ import PatHs.Parser
 import PatHs.Render
 import PatHs.Types
 import Prettyprinter.Render.Terminal (putDoc)
+import Relude
 import System.Directory (createDirectoryIfMissing)
 import System.Environment.XDG.BaseDir (getUserDataDir)
 import System.FilePath ((</>))
