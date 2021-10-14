@@ -73,7 +73,7 @@ completeSingleMark mark goPath =
             Nothing -> value
 
       dirs <- completeDirectory fullPath
-      fmap (replacePrefix key value . addTrailingPathSeparator) <$> case dirs of
+      fmap (replacePrefix value key . addTrailingPathSeparator) <$> case dirs of
         [dir] -> do
           newCompletions <-
             completeDirectory $ addTrailingPathSeparator $ value </> dir
