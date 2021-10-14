@@ -33,6 +33,7 @@ import Data.Either.Combinators (maybeToRight)
 import Data.Map.Strict (Map)
 import Data.Text (Text, isPrefixOf)
 import qualified Data.Text as Text
+import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser
 import System.Directory (getHomeDirectory)
 import Text.Megaparsec (MonadParsec (eof))
@@ -99,17 +100,11 @@ validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof)
 homeDirVariable :: Text
 homeDirVariable = "$HOME"
 
-replaceLeadingString :: Text -> Text -> Text -> Text
-replaceLeadingString search replace text =
-  case Text.stripPrefix search text of
-    Just suffix -> replace <> suffix
-    _ -> text
-
 resolveToHomeDir :: HomeDir -> Text -> ResolvedValue
-resolveToHomeDir (HomeDir homeDir) = ResolvedValue . replaceLeadingString homeDirVariable homeDir
+resolveToHomeDir (HomeDir homeDir) = ResolvedValue . replacePrefix homeDirVariable homeDir
 
 unResolveToHomeDir :: HomeDir -> Text -> Value
-unResolveToHomeDir (HomeDir homeDir) = Value . replaceLeadingString homeDir homeDirVariable
+unResolveToHomeDir (HomeDir homeDir) = Value . replacePrefix homeDir homeDirVariable
 
 mkGoPath :: Text -> Either Error GoPath
 mkGoPath param = do

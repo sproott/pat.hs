@@ -28,6 +28,7 @@ library
       PatHs.Config
       PatHs.Lib
       PatHs.Lib.Command
+      PatHs.Lib.Text
       PatHs.Options
       PatHs.Options.Complete
       PatHs.Parser

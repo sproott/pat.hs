@@ -22,6 +22,7 @@ import Options.Applicative
 import Options.Applicative.Types (Completer (runCompleter))
 import PatHs.Lib
 import PatHs.Lib.Command
+import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser (parse, splitGoPath)
 import PatHs.Types
 import System.FilePath.Text
@@ -78,15 +79,12 @@ completeSingleMark mark goPath =
             Nothing -> value
 
       dirs <- completeDirectory fullPath
-      fmap (replaceWithMark key value . addTrailingPathSeparator) <$> case dirs of
+      fmap (replacePrefix key value . addTrailingPathSeparator) <$> case dirs of
         [dir] -> do
           newCompletions <-
             completeDirectory $ addTrailingPathSeparator $ value </> dir
           pure $ dir : newCompletions
         dirs -> pure dirs
-
-    replaceWithMark :: Text -> Text -> Text -> Text
-    replaceWithMark key value path = (key <>) $ Text.drop (Text.length value) path
 
 completeDirectory :: Text -> IO [Text]
 completeDirectory =
