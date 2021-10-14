@@ -29,6 +29,24 @@ CLI utility for saving often used directories under a short name
 - For other distributions, see the [building](#-building) section
 - Install `paths-bookmarks-git` using your favorite AUR helper
 
+## Post-installation
+
+### Bash
+
+Add the following line to your .bashrc:
+
+```sh
+source /usr/share/paths/paths.sh
+```
+
+### Fish
+
+Add the following line to your config.fish:
+
+```sh
+source /usr/share/paths/paths.fish
+```
+
 ## 👷 Building
 
 Haskell Stack needs to be installed and on the path to install manually.
@@ -43,15 +61,12 @@ stack --local-bin-dir "bin/" install
 
 install -Dm755 "bin/paths" "/usr/share/paths/paths"
 install -Dm755 "paths.sh" "/usr/share/paths/paths.sh"
+install -Dm755 "paths.fish" "/usr/share/paths/paths.fish"
 
 install -Dm644 "doc/completions/bashcompletion.sh" "/usr/share/bash-completion/completions/paths"
+install -Dm644 "doc/completions/fishcompletion.fish" "/usr/share/fish/completions/paths.fish"
 ```
 
-Then add the following line to your .bashrc:
-
-```sh
-source /usr/share/paths/paths.sh
-```
 
 ## 🔧 Bookmarks file
 
