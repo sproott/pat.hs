@@ -1,95 +1,110 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 module PatHs.Lib where
 
-import Control.Monad.Trans.Except (except)
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
-import qualified Data.Text.IO as TextIO
 import PatHs.Config
+import PatHs.Effect.FileSystem (FileSystem)
+import qualified PatHs.Effect.FileSystem as FS
+import PatHs.Effect.Output (Output)
+import qualified PatHs.Effect.Output as Output
 import PatHs.Lib.Command
 import PatHs.Parser
 import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
-import Prettyprinter.Render.Terminal (putDoc)
-import System.Directory (createDirectoryIfMissing)
+import PatHs.Types.Env
+import Polysemy (Embed, Member, Members, Sem)
+import Polysemy.Error (Error, runError)
+import qualified Polysemy.Error as Error
+import Polysemy.Reader (Reader)
+import qualified Polysemy.Reader as Reader
+import System.Directory (getCurrentDirectory)
 import System.Environment.XDG.BaseDir (getUserDataDir)
 import System.FilePath ((</>))
-import System.IO.Error (catchIOError)
 import System.Posix (queryTerminal, stdOutput)
 
-loadMarks :: AppM Marks
+loadMarks :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Marks
 loadMarks = do
   config <- loadConfig
-  except $ Map.fromList <$> convertKeys validateKey config
+  Error.fromEither $ Map.fromList <$> convertKeys validateKey config
 
-getConfigDir :: IO FilePath
-getConfigDir = getUserDataDir "paths"
+loadMarksIO :: Members '[Embed IO, Reader Dirs] r => Sem r (Either AppError Marks)
+loadMarksIO = loadMarks & FS.runFileSystemIO & runError
 
-getConfigPath :: IO FilePath
+getConfigPath :: Member (Reader Dirs) r => Sem r FilePath
 getConfigPath = do
-  dir <- getConfigDir
+  dir <- Reader.ask <&> dirConfig
   pure $ dir </> ".bookmarks"
 
-loadConfig :: AppM Config
+loadConfig :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Config
 loadConfig = do
-  let safeIO' = safeIO (ConfigError CERead)
-  homeDir <- safeIO' getHomeDirectory'
-  contents <- safeIO' $ do
-    createDirectoryIfMissing True =<< getConfigDir
-    configPath <- getConfigPath
-    !contents <- TextIO.readFile configPath `catchIOError` const (pure "")
-    pure contents
-  except $ parseConfig homeDir contents
-
-saveConfig :: Marks -> AppM ()
-saveConfig marks = safeIO (ConfigError CEWrite) $ do
-  homeDir <- getHomeDirectory'
+  configDir <- dirConfig <$> Reader.ask
+  FS.createDirectoryIfMissing True configDir
   configPath <- getConfigPath
-  TextIO.writeFile configPath $ marksToConfigString marks
+  !contents <- FS.readFile configPath
+  parseConfig contents
 
-safeIO :: Error -> IO a -> AppM a
-safeIO err action = ExceptT $ (Right <$> action) `catchIOError` const (pure $ Left err)
+saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
+saveConfig marks = do
+  homeDir <- dirHome <$> Reader.ask
+  configPath <- dirConfig <$> Reader.ask
+  FS.writeFile configPath $ marksToConfigString marks
 
-parseConfig :: HomeDir -> Text -> Either Error Config
-parseConfig homeDir = parse (ConfigError CEInvalid) (configParser homeDir)
+parseConfig :: Members '[Error AppError, Reader Dirs] r => Text -> Sem r Config
+parseConfig input = do
+  configParser' <- configParser
+  Error.fromEither $ parse (ConfigError CEInvalid) configParser' input
 
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
 
-runPatHs :: Marks -> Command c -> AppM ()
-runPatHs marks command = do
-  result <- except $ runCommand command marks
-  consumeResult command result
-
-consumeResult :: Command c -> ReturnType c -> AppM ()
-consumeResult _ (RTSave marks) = saveConfig marks
-consumeResult _ (RTDelete marks) = saveConfig marks
-consumeResult _ (RTRename marks) = saveConfig marks
-consumeResult _ (RTGet value) = liftIO $ do
-  homeDir <- getHomeDirectory'
-  interactive <- isInteractive
+runPatHs :: Members '[Error AppError, FileSystem, Output, Reader Dirs, Reader Env, Reader Marks] r => Command c -> Sem r ()
+runPatHs command@CSave {} = execSave command >>= saveConfig
+runPatHs command@CDelete {} = execDelete command >>= saveConfig
+runPatHs command@CRename {} = execRename command >>= saveConfig
+runPatHs command@CGet {} = do
+  value <- execGet command
+  homeDir <- dirHome <$> Reader.ask
+  interactive <- envIsStdoutInteractive <$> Reader.ask
   ( if interactive
-      then putDoc . renderResolvedValue
-      else putStr . Text.unpack . unResolvedValue
+      then Output.putAnsiDoc . renderResolvedValue
+      else Output.putStr . unResolvedValue
     )
     $ resolveToHomeDir homeDir $ unValue value
-consumeResult _ (RTGo value) = liftIO $ do
-  homeDir <- getHomeDirectory'
-  TextIO.putStrLn $ unResolvedValue value
-consumeResult _ (RTList marks) = liftIO $ do
-  homeDir <- getHomeDirectory'
-  putDoc $ renderMarks $ resolveMarks homeDir marks
+runPatHs command@CGo {} = do
+  value <- execGo command
+  Output.putStrLn $ unResolvedValue value
+runPatHs command@CList = do
+  homeDir <- dirHome <$> Reader.ask
+  marks <- execList command
+  resolvedMarks <- resolveMarks marks
+  Output.putAnsiDoc $ renderMarks resolvedMarks
 
 showMarks :: ResolvedMarks -> [Text]
 showMarks marks = uncurry printTuple <$> Map.toList marks
   where
     printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
 
-resolveMarks :: HomeDir -> Marks -> ResolvedMarks
-resolveMarks homeDir = Map.map (resolveToHomeDir homeDir . unValue)
+resolveMarks :: Member (Reader Dirs) r => Marks -> Sem r ResolvedMarks
+resolveMarks marks = do
+  homeDir <- dirHome <$> Reader.ask
+  pure $ Map.map (resolveToHomeDir homeDir . unValue) marks
+
+runWithMarks :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem (Reader Marks : r) a -> Sem r a
+runWithMarks f = do
+  marks <- loadMarks
+  f & Reader.runReader marks
+
+getConfigDir :: IO FilePath
+getConfigDir = getUserDataDir "paths"
+
+dirsIO :: IO Dirs
+dirsIO = Dirs <$> getHomeDirectory' <*> getConfigDir <*> getCurrentDirectory
+
+envIO :: IO Env
+envIO = Env <$> isInteractive
 
 isInteractive :: IO Bool
 isInteractive = queryTerminal stdOutput

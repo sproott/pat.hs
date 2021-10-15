@@ -26,6 +26,9 @@ source-repository head
 library
   exposed-modules:
       PatHs.Config
+      PatHs.Effect.Complete
+      PatHs.Effect.FileSystem
+      PatHs.Effect.Output
       PatHs.Lib
       PatHs.Lib.Command
       PatHs.Lib.Text
@@ -35,6 +38,7 @@ library
       PatHs.Prelude
       PatHs.Render
       PatHs.Types
+      PatHs.Types.Env
       System.FilePath.Text
   other-modules:
       Paths_paths_bookmarks
@@ -43,6 +47,17 @@ library
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
+      DataKinds
+      FlexibleContexts
+      GADTs
+      LambdaCase
+      PolyKinds
+      RankNTypes
+      ScopedTypeVariables
+      TypeApplications
+      TypeOperators
+      TypeFamilies
+  ghc-options: -Wunused-imports -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin
   build-depends:
       base >=4.7 && <5
     , containers
@@ -52,10 +67,12 @@ library
     , filepath
     , megaparsec
     , optparse-applicative
+    , polysemy
+    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , protolude
     , relude
-    , safe
     , text
     , transformers
     , unix
@@ -71,7 +88,17 @@ executable paths
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports
+      DataKinds
+      FlexibleContexts
+      GADTs
+      LambdaCase
+      PolyKinds
+      RankNTypes
+      ScopedTypeVariables
+      TypeApplications
+      TypeOperators
+      TypeFamilies
+  ghc-options: -Wunused-imports -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
@@ -82,10 +109,12 @@ executable paths
     , megaparsec
     , optparse-applicative
     , paths-bookmarks
+    , polysemy
+    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , protolude
     , relude
-    , safe
     , text
     , transformers
     , unix
@@ -102,7 +131,17 @@ test-suite paths-test
   default-extensions:
       NoImplicitPrelude
       OverloadedStrings
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+      DataKinds
+      FlexibleContexts
+      GADTs
+      LambdaCase
+      PolyKinds
+      RankNTypes
+      ScopedTypeVariables
+      TypeApplications
+      TypeOperators
+      TypeFamilies
+  ghc-options: -Wunused-imports -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
@@ -113,10 +152,12 @@ test-suite paths-test
     , megaparsec
     , optparse-applicative
     , paths-bookmarks
+    , polysemy
+    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
+    , protolude
     , relude
-    , safe
     , text
     , transformers
     , unix

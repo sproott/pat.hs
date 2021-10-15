@@ -1,19 +1,16 @@
-{-# LANGUAGE LambdaCase #-}
-
 module PatHs.Render where
 
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
+import qualified Data.Text as T
 import PatHs.Prelude
 import PatHs.Types
 import Prettyprinter (Doc, Pretty (pretty), annotate, dquotes, fillBreak, indent, line, vsep, (<+>))
 import Prettyprinter.Render.Terminal (AnsiStyle, Color (Blue, Green, Red), colorDull)
-import Safe (maximumMay)
 
-renderError :: HomeDir -> Error -> Doc AnsiStyle
+renderError :: HomeDir -> AppError -> Doc AnsiStyle
 renderError homeDir = annotate (colorDull Red) . convertError
   where
-    convertError :: Error -> Doc a
+    convertError :: AppError -> Doc a
     convertError (ConfigError CEInvalid) = "Invalid config"
     convertError (ConfigError CEWrite) = "Error writing config file"
     convertError (ConfigError CERead) = "Error reading config file"
@@ -27,7 +24,7 @@ renderMarks marks = uncurry renderMarks' $ unzip $ Map.toList marks
   where
     renderMarks' :: [ValidKey] -> [ResolvedValue] -> Doc AnsiStyle
     renderMarks' keys values =
-      let maxLength = fromMaybe 0 $ maximumMay $ Text.length . unValidKey <$> keys
+      let maxLength = fromMaybe 0 $ maximumMay $ T.length . unValidKey <$> keys
           keysDoc = fillBreak maxLength . renderValidKey <$> keys
           valuesDoc = indent 2 . renderResolvedValue <$> values
        in vsep $ zipWith (<+>) keysDoc valuesDoc

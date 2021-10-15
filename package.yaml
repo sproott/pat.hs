@@ -28,10 +28,12 @@ dependencies:
   - filepath
   - megaparsec
   - optparse-applicative
+  - polysemy
+  - polysemy-plugin
   - prettyprinter
   - prettyprinter-ansi-terminal
+  - protolude
   - relude
-  - safe
   - text
   - transformers
   - unix
@@ -40,9 +42,24 @@ dependencies:
 default-extensions:
   - NoImplicitPrelude
   - OverloadedStrings
+  - DataKinds
+  - FlexibleContexts
+  - GADTs
+  - LambdaCase
+  - PolyKinds
+  - RankNTypes
+  - ScopedTypeVariables
+  - TypeApplications
+  - TypeOperators
+  - TypeFamilies
 
 library:
   source-dirs: src
+
+ghc-options:
+  - -Wunused-imports
+  - -O2 -flate-specialise -fspecialise-aggressively
+  - -fplugin=Polysemy.Plugin
 
 executables:
   paths:
@@ -52,7 +69,6 @@ executables:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
-      - -Wunused-imports
     dependencies:
       - paths-bookmarks
 

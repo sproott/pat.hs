@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-
 module PatHs.Options (commandP) where
 
 import Data.Either.Extra (eitherToMaybe)
@@ -44,10 +42,10 @@ getP :: Parser (Command 'Get)
 getP = CGet <$> keyP True
 
 goP :: HomeDir -> Parser (Command 'Go)
-goP homeDir = mkCGo homeDir <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleter))
+goP homeDir = mkCGo <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleterIO))
 
-mkCGo :: HomeDir -> Text -> Command 'Go
-mkCGo homeDir str = CGo homeDir $ eitherToMaybe $ mkGoPath str
+mkCGo :: Text -> Command 'Go
+mkCGo str = CGo $ eitherToMaybe $ mkGoPath str
 
 listP :: Parser (Command 'List)
 listP = pure CList

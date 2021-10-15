@@ -1,18 +1,23 @@
 module Main where
 
-import qualified Data.Text as Text
+import qualified Data.Text as T
 import Options.Applicative (execParser)
+import qualified PatHs.Effect.FileSystem as FS
+import qualified PatHs.Effect.Output as Output
 import PatHs.Lib
 import PatHs.Options
+import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
+import PatHs.Types.Env
+import Polysemy (runM)
+import qualified Polysemy.Error as Error
+import qualified Polysemy.Reader as Reader
 import Prettyprinter.Render.Terminal (putDoc)
-import System.Directory (getCurrentDirectory)
-import PatHs.Prelude
 
 main :: IO ()
 main = do
-  result <- runApp app
+  result <- app
   case result of
     Left err -> do
       homeDir <- getHomeDirectory'
@@ -20,10 +25,17 @@ main = do
       exitFailure
     Right _ -> pure ()
 
-app :: AppM ()
+app :: IO (Either AppError ())
 app = do
-  marks <- loadMarks
-  currentDir <- Text.pack <$> liftIO getCurrentDirectory
-  homeDir <- liftIO getHomeDirectory'
-  (SomeCommand command) <- liftIO $ execParser (commandP homeDir $ unResolveToHomeDir homeDir currentDir)
-  runPatHs marks command
+  dirs <- dirsIO
+  env <- envIO
+  let homeDir = dirHome dirs
+  (SomeCommand command) <- execParser (commandP homeDir $ unResolveToHomeDir homeDir (T.pack $ dirCurrent dirs))
+  runPatHs command
+    & runWithMarks
+    & FS.runFileSystemIO
+    & Output.runOutputIO
+    & Reader.runReader dirs
+    & Reader.runReader env
+    & Error.runError
+    & runM

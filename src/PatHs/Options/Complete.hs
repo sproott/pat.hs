@@ -1,85 +1,92 @@
-{-# LANGUAGE GADTs #-}
-
 module PatHs.Options.Complete
   ( mkCompleter',
     keyCompleter,
     goPathCompleter,
+    goPathCompleterIO,
   )
 where
 
-import Control.Monad.Trans.Except (except)
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
-import Options.Applicative
-  ( Completer,
-    bashCompleter,
-    mkCompleter,
-  )
-import Options.Applicative.Types (Completer (runCompleter))
+import qualified Data.Text as T
+import Options.Applicative (Completer, mkCompleter)
+import PatHs.Effect.Complete (Complete)
+import qualified PatHs.Effect.Complete as Complete
+import PatHs.Effect.FileSystem (FileSystem)
+import qualified PatHs.Effect.FileSystem as FS
 import PatHs.Lib
 import PatHs.Lib.Command
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser (parse, splitGoPath)
 import PatHs.Prelude
 import PatHs.Types
+import PatHs.Types.Env
+import Polysemy (Embed, Members, Sem, runM)
+import Polysemy.Error (Error)
+import qualified Polysemy.Error as Error
+import Polysemy.Reader (Reader)
+import qualified Polysemy.Reader as Reader
 import System.FilePath.Text
   ( addTrailingPathSeparator,
     (</>),
   )
-import System.IO.Error (catchIOError)
 
-mkCompleter' :: MyCompleter -> Completer
-mkCompleter' complete =
-  mkCompleter $ \str -> fmap Text.unpack . fromRight [] <$> runApp (complete $ Text.pack str)
+type MyCompleter r = Text -> Sem r [Text]
 
-type MyCompleter = Text -> AppM [Text]
+mkCompleter' :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Completer
+mkCompleter' completer = mkCompleter $ \str -> fmap (fmap T.unpack) $ runCompleterIO completer $ T.pack str
 
-keyCompleter :: MyCompleter
+runCompleterIO :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Text -> IO [Text]
+runCompleterIO completer str = do
+  dirs <- dirsIO
+  completions <-
+    completer str
+      & runWithMarks
+      & FS.runFileSystemIO
+      & Reader.runReader dirs
+      & Error.runError @AppError
+      & runM
+  pure $ fromRight [] completions
+
+keyCompleter :: Members '[Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
 keyCompleter str = do
-  marks <- loadMarks
-  (RTList marks) <- except $ execList CList marks
-  pure $ filter (Text.isPrefixOf str) $ unValidKey <$> Map.keys marks
+  marks <- execList CList
+  pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleter :: MyCompleter
+goPathCompleterIO :: Members '[Embed IO, Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
+goPathCompleterIO str = goPathCompleter str & Complete.runCompleteIO
+
+goPathCompleter :: Members '[Complete, Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
 goPathCompleter str = do
-  (keyStr, goPathStr) <- except $ parse InvalidGoPath splitGoPath str
+  (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
   marks <- loadMarks
   case keyStr of
     Nothing -> pure $ completeMarks $ Map.toList marks
     Just keyStr -> do
-      (RTList marks) <- except $ execList CList marks
+      marks <- execList CList
       let goPath = GoPath (Key keyStr) goPathStr
-      let matchingMarks = filterMarks (Text.isPrefixOf keyStr) marks
+      let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks
       let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)
       case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
-        (True, Just mark) -> liftIO $ completeSingleMark mark goPath
+        (True, Just mark) -> completeSingleMark mark goPath
         _ -> pure $ completeMarks matchingMarks
   where
     completeMarks matchingMarks = addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
     filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
-completeSingleMark :: (ValidKey, Value) -> GoPath -> IO [Text]
-completeSingleMark mark goPath =
-  resolveDirs mark goPath
-    `catchIOError` const (pure [])
-  where
-    key = unValidKey $ fst mark
-    resolveDirs mark goPath = do
-      homeDir <- getHomeDirectory'
+completeSingleMark :: Members '[Complete, Reader Dirs] r => (ValidKey, Value) -> GoPath -> Sem r [Text]
+completeSingleMark mark goPath = do
+  let key = unValidKey $ fst mark
+  homeDir <- dirHome <$> Reader.ask
 
-      let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-      let fullPath = case path goPath of
-            Just goPathStr -> value </> goPathStr
-            Nothing -> value
+  let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
+  let fullPath = case path goPath of
+        Just goPathStr -> value </> goPathStr
+        Nothing -> value
 
-      dirs <- completeDirectory fullPath
-      fmap (replacePrefix value key . addTrailingPathSeparator) <$> case dirs of
-        [dir] -> do
-          newCompletions <-
-            completeDirectory $ addTrailingPathSeparator $ value </> dir
-          pure $ dir : newCompletions
-        dirs -> pure dirs
-
-completeDirectory :: Text -> IO [Text]
-completeDirectory =
-  fmap (fmap Text.pack) . runCompleter (bashCompleter "directory") . Text.unpack
+  dirs <- Complete.completeDirectory fullPath
+  fmap (replacePrefix value key . addTrailingPathSeparator) <$> case dirs of
+    [dir] -> do
+      newCompletions <-
+        Complete.completeDirectory $ addTrailingPathSeparator $ value </> dir
+      pure $ dir : newCompletions
+    dirs -> pure dirs

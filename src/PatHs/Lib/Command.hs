@@ -1,60 +1,60 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 
 module PatHs.Lib.Command where
 
-import Data.Either.Extra (maybeToEither)
 import qualified Data.Map.Strict as Map
 import PatHs.Prelude
 import PatHs.Types
+import PatHs.Types.Env
+import Polysemy (Member, Members, Sem)
+import Polysemy.Error (Error)
+import qualified Polysemy.Error as Error
+import Polysemy.Reader (Reader)
+import qualified Polysemy.Reader as Reader
 import System.FilePath.Text (dropTrailingPathSeparator, (</>))
 
-type ExecCommand (c :: CommandType) = Command c -> Marks -> Either Error (ReturnType c)
+type ExecCommand (c :: CommandType) a r = Members '[Error AppError, Reader Marks] r => Command c -> Sem r a
 
-execSave :: ExecCommand Save
-execSave (CSave key value) marks = do
-  validKey <- validateKey key
+validateKey' :: Member (Error AppError) r => Key -> Sem r ValidKey
+validateKey' = Error.fromEither . validateKey
+
+execSave :: ExecCommand Save Marks r
+execSave (CSave key value) = do
+  marks <- Reader.ask
+  validKey <- validateKey' key
   case Map.lookup validKey marks of
-    Just value -> Left $ AlreadyExists key value
-    Nothing -> pure $ RTSave $ Map.insert validKey value marks
+    Just value -> Error.throw $ AlreadyExists key value
+    Nothing -> pure $ Map.insert validKey value marks
 
-execDelete :: ExecCommand Delete
-execDelete (CDelete key) marks = do
-  execGet' (CGet key) marks
-  validKey <- validateKey key
-  pure $ RTDelete $ Map.delete validKey marks
+execDelete :: ExecCommand Delete Marks r
+execDelete (CDelete key) = do
+  marks <- Reader.ask
+  execGet (CGet key)
+  validKey <- validateKey' key
+  pure $ Map.delete validKey marks
 
-execRename :: ExecCommand Rename
-execRename (CRename key newKey) marks = do
-  value <- execGet' (CGet key) marks
-  validKey <- validateKey key
-  validNewKey <- validateKey newKey
-  pure $ RTRename $ Map.insert validNewKey value $ Map.delete validKey marks
+execRename :: ExecCommand Rename Marks r
+execRename (CRename key newKey) = do
+  marks <- Reader.ask
+  value <- execGet (CGet key)
+  validKey <- validateKey' key
+  validNewKey <- validateKey' newKey
+  pure $ Map.insert validNewKey value $ Map.delete validKey marks
 
-execGet :: ExecCommand Get
-execGet command marks = RTGet <$> execGet' command marks
-
-execGet' :: Command Get -> Marks -> Either Error Value
-execGet' (CGet key) marks = do
-  validKey <- validateKey key
+execGet :: ExecCommand Get Value r
+execGet (CGet key) = do
+  marks <- Reader.ask
+  validKey <- validateKey' key
   case Map.lookup validKey marks of
-    Nothing -> Left $ NotExists key
+    Nothing -> Error.throw $ NotExists key
     Just value -> pure value
 
-execGo :: ExecCommand Go
-execGo (CGo homeDir goPath) marks = do
-  goPath <- maybeToEither InvalidGoPath goPath
-  value <- execGet' (CGet $ Key (dropTrailingPathSeparator $ unKey $ key goPath)) marks
-  pure $ RTGo $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)
+execGo :: Member (Reader Dirs) r => ExecCommand Go ResolvedValue r
+execGo (CGo goPath) = do
+  homeDir <- dirHome <$> Reader.ask
+  goPath <- Error.note InvalidGoPath goPath
+  value <- execGet (CGet $ Key (dropTrailingPathSeparator $ unKey $ key goPath))
+  pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)
 
-execList :: ExecCommand List
-execList CList = pure . RTList
-
-runCommand :: ExecCommand c
-runCommand command@CSave {} = execSave command
-runCommand command@CDelete {} = execDelete command
-runCommand command@CRename {} = execRename command
-runCommand command@CGet {} = execGet command
-runCommand command@CGo {} = execGo command
-runCommand command@CList = execList command
+execList :: ExecCommand List Marks r
+execList CList = Reader.ask

@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
@@ -16,7 +14,7 @@ module PatHs.Types
     Command (..),
     SomeCommand (..),
     ReturnType (..),
-    Error (..),
+    AppError (..),
     ConfigError (..),
     getHomeDirectory',
     validateKey,
@@ -28,16 +26,16 @@ module PatHs.Types
   )
 where
 
-import qualified Data.Text as Text
+import qualified Data.Text as T
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser
+import PatHs.Prelude
 import System.Directory (getHomeDirectory)
 import Text.Megaparsec (MonadParsec (eof))
-import PatHs.Prelude
 
-type AppM a = ExceptT Error IO a
+type AppM a = ExceptT AppError IO a
 
-runApp :: AppM a -> IO (Either Error a)
+runApp :: AppM a -> IO (Either AppError a)
 runApp = runExceptT
 
 newtype Key = Key {unKey :: Text} deriving (Eq, Ord, Show)
@@ -63,7 +61,7 @@ data Command (c :: CommandType) where
   CDelete :: Key -> Command Delete
   CRename :: Key -> Key -> Command Rename
   CGet :: Key -> Command Get
-  CGo :: HomeDir -> Maybe GoPath -> Command Go
+  CGo :: Maybe GoPath -> Command Go
   CList :: Command List
 
 deriving instance Eq (Command c)
@@ -84,14 +82,14 @@ deriving instance Eq (ReturnType c)
 
 deriving instance Show (ReturnType c)
 
-data Error = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
+data AppError = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
 data ConfigError = CERead | CEWrite | CEInvalid deriving (Eq, Show)
 
 getHomeDirectory' :: IO HomeDir
-getHomeDirectory' = HomeDir . Text.pack <$> getHomeDirectory
+getHomeDirectory' = HomeDir . T.pack <$> getHomeDirectory
 
-validateKey :: Key -> Either Error ValidKey
+validateKey :: Key -> Either AppError ValidKey
 validateKey key@(Key str) = ValidKey <$> parse (MalformedKey key) (ident <* eof) str
 
 homeDirVariable :: Text
@@ -103,7 +101,7 @@ resolveToHomeDir (HomeDir homeDir) = ResolvedValue . replacePrefix homeDirVariab
 unResolveToHomeDir :: HomeDir -> Text -> Value
 unResolveToHomeDir (HomeDir homeDir) = Value . replacePrefix homeDir homeDirVariable
 
-mkGoPath :: Text -> Either Error GoPath
+mkGoPath :: Text -> Either AppError GoPath
 mkGoPath param = do
   (keyStr, goPathStr) <- parse InvalidGoPath splitGoPath param
   keyStr <- maybeToRight InvalidGoPath keyStr

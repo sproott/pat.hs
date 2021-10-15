@@ -1,7 +1,7 @@
 module PatHs.Parser where
 
 import Control.Arrow (left)
-import qualified Data.Text as Text
+import qualified Data.Text as T
 import PatHs.Prelude hiding (many, optional)
 import System.FilePath (pathSeparator)
 import Text.Megaparsec (Parsec, many, optional, runParser)
@@ -19,7 +19,7 @@ ident :: Parser Text
 ident = do
   c <- letterChar <|> char '_'
   cs <- many (alphaNumChar <|> char '_' <|> char '-')
-  pure $ Text.pack (c : cs)
+  pure $ T.pack (c : cs)
 
 line :: Parser (Text, Text)
 line = do
@@ -27,7 +27,7 @@ line = do
   _ <- char '='
   value <- many printChar
   eol
-  pure (key, Text.pack value)
+  pure (key, T.pack value)
 
 file :: Parser [(Text, Text)]
 file = many line
@@ -38,7 +38,7 @@ splitGoPath = do
   goPath <- optional $ do
     _ <- char pathSeparator
     many printChar
-  pure (key, Text.pack <$> goPath)
+  pure (key, T.pack <$> goPath)
 
 parse :: e -> Parser a -> Text -> Either e a
 parse error parser contents = left (const error) $ runParser parser empty contents

@@ -1,3 +1,4 @@
-module PatHs.Prelude (module Export) where
+module PatHs.Prelude (module Relude, module Protolude.Safe) where
 
-import Relude as Export
+import Protolude.Safe
+import Relude hiding (Reader)
