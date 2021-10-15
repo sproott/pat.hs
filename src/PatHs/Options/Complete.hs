@@ -53,7 +53,7 @@ keyCompleter str = do
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
 goPathCompleterIO :: Member (Embed IO) r => MyCompleter r
-goPathCompleterIO str = goPathCompleter str & Complete.runCompleteIO
+goPathCompleterIO = Complete.runCompleteIO . goPathCompleter
 
 goPathCompleter :: Member Complete r => MyCompleter r
 goPathCompleter str = do
