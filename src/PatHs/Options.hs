@@ -5,8 +5,8 @@ module PatHs.Options (commandP) where
 import Data.Either.Extra (eitherToMaybe)
 import Options.Applicative
 import PatHs.Options.Complete
+import PatHs.Prelude
 import PatHs.Types
-import Prelude
 
 commandP :: HomeDir -> Value -> ParserInfo SomeCommand
 commandP homeDir currentDirectory =

@@ -33,7 +33,7 @@ import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser
 import System.Directory (getHomeDirectory)
 import Text.Megaparsec (MonadParsec (eof))
-import Prelude
+import PatHs.Prelude
 
 type AppM a = ExceptT Error IO a
 

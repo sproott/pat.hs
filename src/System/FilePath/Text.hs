@@ -9,7 +9,7 @@ where
 
 import qualified Data.Text as Text
 import qualified System.FilePath as FP
-import Prelude
+import PatHs.Prelude
 
 convert :: (FilePath -> FilePath) -> Text -> Text
 convert f = Text.pack . f . Text.unpack

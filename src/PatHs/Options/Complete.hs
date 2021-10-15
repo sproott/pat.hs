@@ -20,13 +20,13 @@ import PatHs.Lib
 import PatHs.Lib.Command
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser (parse, splitGoPath)
+import PatHs.Prelude
 import PatHs.Types
 import System.FilePath.Text
   ( addTrailingPathSeparator,
     (</>),
   )
 import System.IO.Error (catchIOError)
-import Prelude
 
 mkCompleter' :: MyCompleter -> Completer
 mkCompleter' complete =

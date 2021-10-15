@@ -1,7 +1,7 @@
 module PatHs.Lib.Text where
 
 import qualified Data.Text as Text
-import Prelude
+import PatHs.Prelude
 
 replacePrefix :: Text -> Text -> Text -> Text
 replacePrefix search replace text =

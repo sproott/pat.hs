@@ -32,9 +32,9 @@ library
       PatHs.Options
       PatHs.Options.Complete
       PatHs.Parser
+      PatHs.Prelude
       PatHs.Render
       PatHs.Types
-      Prelude
       System.FilePath.Text
   other-modules:
       Paths_paths_bookmarks

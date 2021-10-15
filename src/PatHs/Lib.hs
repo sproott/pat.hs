@@ -10,6 +10,7 @@ import qualified Data.Text.IO as TextIO
 import PatHs.Config
 import PatHs.Lib.Command
 import PatHs.Parser
+import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
 import Prettyprinter.Render.Terminal (putDoc)
@@ -18,7 +19,6 @@ import System.Environment.XDG.BaseDir (getUserDataDir)
 import System.FilePath ((</>))
 import System.IO.Error (catchIOError)
 import System.Posix (queryTerminal, stdOutput)
-import Prelude
 
 loadMarks :: AppM Marks
 loadMarks = do

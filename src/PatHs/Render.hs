@@ -4,11 +4,11 @@ module PatHs.Render where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import PatHs.Prelude
 import PatHs.Types
 import Prettyprinter (Doc, Pretty (pretty), annotate, dquotes, fillBreak, indent, line, vsep, (<+>))
 import Prettyprinter.Render.Terminal (AnsiStyle, Color (Blue, Green, Red), colorDull)
 import Safe (maximumMay)
-import Prelude
 
 renderError :: HomeDir -> Error -> Doc AnsiStyle
 renderError homeDir = annotate (colorDull Red) . convertError
