@@ -20,7 +20,7 @@ import PatHs.Parser (parse, splitGoPath)
 import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
-import Polysemy (Embed, Members, Sem, runM)
+import Polysemy (Embed, Member, Members, Sem, runM)
 import Polysemy.Error (Error)
 import qualified Polysemy.Error as Error
 import Polysemy.Reader (Reader)
@@ -30,7 +30,7 @@ import System.FilePath.Text
     (</>),
   )
 
-type MyCompleter r = Text -> Sem r [Text]
+type MyCompleter r = Members '[Error AppError, FileSystem, Reader Dirs, Reader Marks] r => Text -> Sem r [Text]
 
 mkCompleter' :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Completer
 mkCompleter' completer = mkCompleter $ \str -> fmap (fmap T.unpack) $ runCompleterIO completer $ T.pack str
@@ -47,15 +47,15 @@ runCompleterIO completer str = do
       & runM
   pure $ fromRight [] completions
 
-keyCompleter :: Members '[Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
+keyCompleter :: MyCompleter r
 keyCompleter str = do
   marks <- execList CList
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleterIO :: Members '[Embed IO, Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
+goPathCompleterIO :: Member (Embed IO) r => MyCompleter r
 goPathCompleterIO str = goPathCompleter str & Complete.runCompleteIO
 
-goPathCompleter :: Members '[Complete, Error AppError, FileSystem, Reader Dirs, Reader Marks] r => MyCompleter r
+goPathCompleter :: Member Complete r => MyCompleter r
 goPathCompleter str = do
   (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
   marks <- loadMarks
