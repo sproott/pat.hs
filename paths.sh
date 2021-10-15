@@ -1,11 +1,16 @@
 #!/usr/bin/env sh
 
-dir="/usr/share/paths"
+DIR="/usr/share/paths"
 
 paths() {
   if [ "$1" = "go" ]; then
-    cd "$($dir/paths go $2)";
+    OUTPUT="$($DIR/paths go $2)";
+    if [ $? -ne 0 ]; then
+      echo "$OUTPUT"
+      return 1
+    fi
+    cd "$OUTPUT"
   else
-    $dir/paths "$@";
+    $DIR/paths "$@";
   fi
 }
