@@ -8,8 +8,8 @@ module System.FilePath.Text
 where
 
 import qualified Data.Text as Text
-import Relude
 import qualified System.FilePath as FP
+import Prelude
 
 convert :: (FilePath -> FilePath) -> Text -> Text
 convert f = Text.pack . f . Text.unpack

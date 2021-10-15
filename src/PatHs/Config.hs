@@ -4,7 +4,7 @@ import Control.Arrow ((***))
 import qualified Data.Map.Strict as Map
 import PatHs.Parser
 import PatHs.Types
-import Relude
+import Prelude
 
 type Config = [(Key, Value)]
 

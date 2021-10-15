@@ -2,7 +2,6 @@ module PatHs.Parser where
 
 import Control.Arrow (left)
 import qualified Data.Text as Text
-import Relude hiding (many, optional)
 import System.FilePath (pathSeparator)
 import Text.Megaparsec (Parsec, many, optional, runParser)
 import Text.Megaparsec.Char
@@ -12,6 +11,7 @@ import Text.Megaparsec.Char
     letterChar,
     printChar,
   )
+import Prelude hiding (many, optional)
 
 type Parser = Parsec Void Text
 

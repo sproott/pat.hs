@@ -6,7 +6,7 @@ import Data.Either.Extra (eitherToMaybe)
 import Options.Applicative
 import PatHs.Options.Complete
 import PatHs.Types
-import Relude
+import Prelude
 
 commandP :: HomeDir -> Value -> ParserInfo SomeCommand
 commandP homeDir currentDirectory =

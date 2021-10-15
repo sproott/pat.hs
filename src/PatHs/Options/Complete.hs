@@ -21,12 +21,12 @@ import PatHs.Lib.Command
 import PatHs.Lib.Text (replacePrefix)
 import PatHs.Parser (parse, splitGoPath)
 import PatHs.Types
-import Relude
 import System.FilePath.Text
   ( addTrailingPathSeparator,
     (</>),
   )
 import System.IO.Error (catchIOError)
+import Prelude
 
 mkCompleter' :: MyCompleter -> Completer
 mkCompleter' complete =
@@ -37,7 +37,7 @@ type MyCompleter = Text -> AppM [Text]
 keyCompleter :: MyCompleter
 keyCompleter str = do
   marks <- loadMarks
-  (RTList marks) <- except $ list CList marks
+  (RTList marks) <- except $ execList CList marks
   pure $ filter (Text.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
 goPathCompleter :: MyCompleter
@@ -47,7 +47,7 @@ goPathCompleter str = do
   case keyStr of
     Nothing -> pure $ completeMarks $ Map.toList marks
     Just keyStr -> do
-      (RTList marks) <- except $ list CList marks
+      (RTList marks) <- except $ execList CList marks
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (Text.isPrefixOf keyStr) marks
       let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)

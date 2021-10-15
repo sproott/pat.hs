@@ -34,6 +34,7 @@ library
       PatHs.Parser
       PatHs.Render
       PatHs.Types
+      Prelude
       System.FilePath.Text
   other-modules:
       Paths_paths_bookmarks

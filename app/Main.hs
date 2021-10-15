@@ -7,8 +7,8 @@ import PatHs.Options
 import PatHs.Render
 import PatHs.Types
 import Prettyprinter.Render.Terminal (putDoc)
-import Relude
 import System.Directory (getCurrentDirectory)
+import Prelude
 
 main :: IO ()
 main = do

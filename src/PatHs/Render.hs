@@ -7,8 +7,8 @@ import qualified Data.Text as Text
 import PatHs.Types
 import Prettyprinter (Doc, Pretty (pretty), annotate, dquotes, fillBreak, indent, line, vsep, (<+>))
 import Prettyprinter.Render.Terminal (AnsiStyle, Color (Blue, Green, Red), colorDull)
-import Relude
 import Safe (maximumMay)
+import Prelude
 
 renderError :: HomeDir -> Error -> Doc AnsiStyle
 renderError homeDir = annotate (colorDull Red) . convertError
