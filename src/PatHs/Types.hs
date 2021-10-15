@@ -13,7 +13,6 @@ module PatHs.Types
     HomeDir (unHomeDir),
     Command (..),
     SomeCommand (..),
-    ReturnType (..),
     AppError (..),
     ConfigError (..),
     getHomeDirectory',
@@ -69,18 +68,6 @@ deriving instance Eq (Command c)
 deriving instance Show (Command c)
 
 data SomeCommand = forall (c :: CommandType). SomeCommand (Command c)
-
-data ReturnType (c :: CommandType) where
-  RTSave :: Marks -> ReturnType Save
-  RTDelete :: Marks -> ReturnType Delete
-  RTRename :: Marks -> ReturnType Rename
-  RTGet :: Value -> ReturnType Get
-  RTGo :: ResolvedValue -> ReturnType Go
-  RTList :: Marks -> ReturnType List
-
-deriving instance Eq (ReturnType c)
-
-deriving instance Show (ReturnType c)
 
 data AppError = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
