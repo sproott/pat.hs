@@ -34,9 +34,7 @@ loadMarksIO :: Members '[Embed IO, Reader Dirs] r => Sem r (Either AppError Mark
 loadMarksIO = loadMarks & FS.runFileSystemIO & runError
 
 getConfigPath :: Member (Reader Dirs) r => Sem r FilePath
-getConfigPath = do
-  dir <- Reader.ask <&> dirConfig
-  pure $ dir </> ".bookmarks"
+getConfigPath = (</> ".bookmarks") . dirConfig <$> Reader.ask
 
 loadConfig :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Config
 loadConfig = do
@@ -81,11 +79,6 @@ runPatHs command@CList = do
   marks <- execList command
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks
-
-showMarks :: ResolvedMarks -> [Text]
-showMarks marks = uncurry printTuple <$> Map.toList marks
-  where
-    printTuple validKey resolvedValue = unValidKey validKey <> "    " <> unResolvedValue resolvedValue
 
 resolveMarks :: Member (Reader Dirs) r => Marks -> Sem r ResolvedMarks
 resolveMarks marks = do
