@@ -158,6 +158,8 @@ test-suite paths-test
     , prettyprinter-ansi-terminal
     , protolude
     , relude
+    , tasty
+    , tasty-hunit
     , text
     , transformers
     , unix

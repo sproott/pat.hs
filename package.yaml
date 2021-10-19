@@ -82,3 +82,5 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - paths-bookmarks
+      - tasty
+      - tasty-hunit
