@@ -30,7 +30,7 @@ import System.FilePath.Text
     (</>),
   )
 
-type MyCompleter r = Members '[Error AppError, Reader Marks] r => Text -> Sem r [Text]
+type MyCompleter r = Text -> Sem r [Text]
 
 mkCompleter' :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Completer
 mkCompleter' completer = mkCompleter $ \str -> fmap (fmap T.unpack) $ runCompleterIO completer $ T.pack str
@@ -47,17 +47,18 @@ runCompleterIO completer str = do
       & runM
   pure $ fromRight [] completions
 
-keyCompleter :: MyCompleter r
+keyCompleter :: Member (Reader Marks) r => MyCompleter r
 keyCompleter str = do
   marks <- execList CList
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleterIO :: Member (Embed IO) r => MyCompleter r
+goPathCompleterIO :: Members '[Embed IO, Reader Marks] r => MyCompleter r
 goPathCompleterIO str = do
   dirs <- embed dirsIO
-  goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs
+  completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runError
+  pure $ fromRight [] completions
 
-goPathCompleter :: Members '[Complete, Reader Dirs] r => MyCompleter r
+goPathCompleter :: Members '[Complete, Error AppError, Reader Dirs, Reader Marks] r => MyCompleter r
 goPathCompleter str = do
   (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
   marks <- execList CList
