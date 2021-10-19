@@ -10,7 +10,7 @@ module PatHs.Types
     Marks,
     ResolvedMarks,
     CommandType (..),
-    HomeDir (unHomeDir),
+    HomeDir (..),
     Command (..),
     SomeCommand (..),
     AppError (..),
