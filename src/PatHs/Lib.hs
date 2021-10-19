@@ -58,7 +58,7 @@ parseConfig input = do
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
 
-runPatHs :: Members '[Error AppError, FileSystem, Output, Reader Dirs, Reader Env, Reader Marks] r => Command c -> Sem r ()
+runPatHs :: Members '[Error AppError, FileSystem, Output Text, Reader Dirs, Reader Env, Reader Marks] r => Command c -> Sem r ()
 runPatHs command@CSave {} = execSave command >>= saveConfig
 runPatHs command@CDelete {} = execDelete command >>= saveConfig
 runPatHs command@CRename {} = execRename command >>= saveConfig
@@ -68,7 +68,7 @@ runPatHs command@CGet {} = do
   interactive <- envIsStdoutInteractive <$> Reader.ask
   ( if interactive
       then Output.putAnsiDoc . renderResolvedValue
-      else Output.putStr . unResolvedValue
+      else Output.output . unResolvedValue
     )
     $ resolveToHomeDir homeDir $ unValue value
 runPatHs command@CGo {} = do
