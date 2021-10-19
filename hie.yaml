@@ -1,2 +1,8 @@
 cradle:
   stack:
+    - path: "./app/Main.hs"
+      component: "paths-bookmarks:exe:paths"
+    - path: "./test/Spec.hs"
+      component: "paths-bookmarks:test:paths-test"
+    - path: "./"
+      component: "paths-bookmarks:lib"
