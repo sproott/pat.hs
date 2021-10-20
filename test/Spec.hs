@@ -45,20 +45,30 @@ testKeyCompleter =
   testGroup
     "keyCompleter"
     [ testCase "No match" $ do
-        marks <- verifyMarks [("bar", "baz")]
+        marks <- verifyMarks marks
         assert
-          (keyCompleter' "f" marks)
+          (keyCompleter' "c" marks)
           isEmpty,
+      testCase "Single match" $ do
+        marks <- verifyMarks marks
+        assert
+          (keyCompleter' "r" marks)
+          (eq ["root"]),
       testCase "Single exact match" $ do
-        marks <- verifyMarks [("foo", "bar"), ("bar", "baz")]
+        marks <- verifyMarks marks
         assert
-          (keyCompleter' "f" marks)
-          (eq ["foo"]),
+          (keyCompleter' "root" marks)
+          (eq ["root"]),
       testCase "Multiple matches" $ do
-        marks <- verifyMarks [("foo", "bar"), ("foo2", "bar2"), ("bar", "baz")]
+        marks <- verifyMarks marks
         assert
-          (keyCompleter' "f" marks)
-          (equivalent ["foo", "foo2"])
+          (keyCompleter' "h" marks)
+          (equivalent ["home", "home2"]),
+      testCase "Multiple matches with one exact match" $ do
+        marks <- verifyMarks marks
+        assert
+          (keyCompleter' "home" marks)
+          (equivalent ["home", "home2"])
     ]
   where
     keyCompleter' :: Text -> Marks -> [Text]
@@ -69,34 +79,34 @@ testGoPathCompleter =
   testGroup
     "goPathCompleter"
     [ testCase "No match" $ do
-        marks <- verifyMarks [("bar", "baz")]
+        marks <- verifyMarks marks
         assert
-          (goPathCompleter' "f" marks (const []))
+          (goPathCompleter' "config" marks (const []))
           (right isEmpty),
       testCase "Empty returns all marks" $ do
-        marks <- verifyMarks [("foo", "bar"), ("bar", "baz")]
+        marks <- verifyMarks marks
         assert
           (goPathCompleter' "" marks (const []))
-          (right (equivalent ["foo/", "bar/"])),
+          (right (equivalent ["home/", "home2/", "root/", "lbin/"])),
       testCase "Multiple matching marks" $ do
-        marks <- verifyMarks [("foo", "bar"), ("bar", "baz"), ("foo2", "bar2")]
+        marks <- verifyMarks marks
         assert
-          (goPathCompleter' "f" marks (const []))
-          (right (equivalent ["foo/", "foo2/"])),
+          (goPathCompleter' "h" marks (const []))
+          (right (equivalent ["home/", "home2/"])),
       testCase "Multiple matching marks with one exact match" $ do
-        marks <- verifyMarks [("foo", "bar"), ("bar", "baz"), ("foo2", "bar2")]
+        marks <- verifyMarks marks
         assert
-          (goPathCompleter' "foo" marks (const []))
-          (right (equivalent ["foo/", "foo2/"])),
+          (goPathCompleter' "home" marks (const []))
+          (right (equivalent ["home/", "home2/"])),
       testCase "One matching mark completes" $ do
-        marks <- verifyMarks [("foo", "bar"), ("bar", "baz"), ("foo2", "bar2")]
-        let complete "bar" = ["bar/foo", "bar/bar"]
+        marks <- verifyMarks marks
+        let complete "/home/user" = ["/home/user/.config", "/home/user/.local"]
             complete _ = []
         assert
-          (goPathCompleter' "foo/" marks complete)
-          (right (equivalent ["foo/foo/", "foo/bar/"])),
+          (goPathCompleter' "home/" marks complete)
+          (right (equivalent ["home/.config/", "home/.local/"])),
       testCase "One matching directory cascades" $ do
-        marks <- verifyMarks [("home", "/home/user"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
+        marks <- verifyMarks marks
         let complete "/home/user" = ["/home/user/.config"]
             complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
@@ -104,7 +114,7 @@ testGoPathCompleter =
           (goPathCompleter' "home/" marks complete)
           (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
       testCase "Multiple matching directories complete" $ do
-        marks <- verifyMarks [("home", "/home/user"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
+        marks <- verifyMarks marks
         let complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
         assert
@@ -121,11 +131,8 @@ testGoPathCompleter =
         & Error.runError
         & run
 
-equivalent :: (Eq a, Show a) => [a] -> Predicate [a]
-equivalent = unorderedElemsAre . fmap eq
-
-assert :: a -> Predicate a -> Assertion
-assert x p = if accept p x then pure () else assertFailure $ explain p x
+marks :: [(Text, Text)]
+marks = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
 
 dirs :: Dirs
 dirs = Dirs {dirConfig = "/home/user/.local/share/paths", dirCurrent = "/home/user", dirHome = homeDir}
@@ -142,6 +149,12 @@ verifyMarks list = do
 
 mkMarks :: [(Text, Text)] -> Maybe Marks
 mkMarks = eitherToMaybe . fmap Map.fromList . traverse (bitraverse (validateKey . Key) (pure . unResolveToHomeDir homeDir))
+
+equivalent :: (Eq a, Show a) => [a] -> Predicate [a]
+equivalent = unorderedElemsAre . fmap eq
+
+assert :: a -> Predicate a -> Assertion
+assert x p = if accept p x then pure () else assertFailure $ explain p x
 
 runCompletePure :: (Text -> [Text]) -> Sem (Complete ': r) a -> Sem r a
 runCompletePure complete = interpret $ \case
