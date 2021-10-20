@@ -91,5 +91,4 @@ unResolveToHomeDir (HomeDir homeDir) = Value . replacePrefix homeDir homeDirVari
 mkGoPath :: Text -> Either AppError GoPath
 mkGoPath param = do
   (keyStr, goPathStr) <- parse InvalidGoPath splitGoPath param
-  keyStr <- maybeToRight InvalidGoPath keyStr
   pure $ GoPath (Key keyStr) goPathStr

@@ -63,8 +63,8 @@ goPathCompleter str = do
   (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
   marks <- execList CList
   case keyStr of
-    Nothing -> pure $ completeMarks $ Map.toList marks
-    Just keyStr -> do
+    "" -> pure $ completeMarks $ Map.toList marks
+    _ -> do
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks
       let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)

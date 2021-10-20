@@ -32,9 +32,9 @@ line = do
 file :: Parser [(Text, Text)]
 file = many line
 
-splitGoPath :: Parser (Maybe Text, Maybe Text)
+splitGoPath :: Parser (Text, Maybe Text)
 splitGoPath = do
-  key <- optional ident
+  key <- ident <|> ""
   goPath <- optional $ do
     _ <- char pathSeparator
     many printChar
