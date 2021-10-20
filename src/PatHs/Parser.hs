@@ -34,7 +34,7 @@ file = many line
 
 splitGoPath :: Parser (Text, Maybe Text)
 splitGoPath = do
-  key <- ident <|> ""
+  key <- ident
   goPath <- optional $ do
     _ <- char pathSeparator
     many printChar

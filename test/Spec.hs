@@ -5,7 +5,7 @@ import qualified Data.Map.Strict as Map
 import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
 import PatHs.Options.Complete (goPathCompleter, keyCompleter)
-import PatHs.Prelude hiding (Predicate, just, right)
+import PatHs.Prelude hiding (Predicate, just, left, right)
 import PatHs.Types
 import PatHs.Types.Env
 import Polysemy (Sem, interpret, run)
@@ -13,8 +13,10 @@ import qualified Polysemy.Error as Error
 import qualified Polysemy.Reader as Reader
 import Test.Predicates
   ( Predicate (accept, explain),
+    anything,
     eq,
     isEmpty,
+    left,
     right,
     unorderedElemsAre,
   )
@@ -120,16 +122,16 @@ testGoPathCompleter =
         assert
           (goPathCompleter' "home/.config/" marks complete)
           (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
-      testCase "GoPath = \"/\" gives no matches" $ do
+      testCase "GoPath = \"/\" fails" $ do
         marks <- verifyMarks marks
         assert
           (goPathCompleter' "/" marks (const []))
-          (right isEmpty),
-      testCase "GoPath starting with / gives no matches" $ do
+          (left anything),
+      testCase "GoPath starting with '/' fails" $ do
         marks <- verifyMarks marks
         assert
           (goPathCompleter' "/.config" marks (const []))
-          (right isEmpty)
+          (left anything)
     ]
   where
     goPathCompleter' :: Text -> Marks -> (Text -> [Text]) -> Either AppError [Text]

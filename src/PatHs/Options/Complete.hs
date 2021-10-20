@@ -59,15 +59,15 @@ goPathCompleterIO str = do
   pure $ fromRight [] completions
 
 goPathCompleter :: Members '[Complete, Error AppError, Reader Dirs, Reader Marks] r => MyCompleter r
-goPathCompleter str = do
-  (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
-  marks <- execList CList
-  let goPath = GoPath (Key keyStr) goPathStr
-  case keyStr of
-    "" -> case path goPath of
-      Nothing -> pure $ completeMarks $ Map.toList marks
-      Just _ -> pure []
-    _ -> do
+goPathCompleter str =
+  if T.null str
+    then do
+      marks <- execList CList
+      pure $ completeMarks $ Map.toList marks
+    else do
+      (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
+      marks <- execList CList
+      let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks
       let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)
       case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
