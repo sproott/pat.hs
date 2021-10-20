@@ -147,6 +147,7 @@ test-suite paths-test
     , containers
     , directory
     , either
+    , explainable-predicates
     , extra
     , filepath
     , megaparsec
