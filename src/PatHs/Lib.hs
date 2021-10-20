@@ -42,7 +42,7 @@ loadConfig = do
   FS.createDirectoryIfMissing True configDir
   configPath <- getConfigPath
   !contents <- FS.readFile configPath
-  parseConfig contents
+  parseConfig $ fromMaybe "" contents
 
 saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
 saveConfig marks = do

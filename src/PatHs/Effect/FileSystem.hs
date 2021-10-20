@@ -10,7 +10,7 @@ import qualified System.Directory as IO (createDirectoryIfMissing)
 
 data FileSystem m a where
   CreateDirectoryIfMissing :: Bool -> FilePath -> FileSystem m ()
-  ReadFile :: FilePath -> FileSystem m Text
+  ReadFile :: FilePath -> FileSystem m (Maybe Text)
   WriteFile :: FilePath -> Text -> FileSystem m ()
 
 makeSem ''FileSystem
@@ -18,5 +18,5 @@ makeSem ''FileSystem
 runFileSystemIO :: Member (Embed IO) r => Sem (FileSystem ': r) a -> Sem r a
 runFileSystemIO = interpret $ \case
   CreateDirectoryIfMissing parents dir -> embed $ IO.createDirectoryIfMissing parents dir
-  ReadFile path -> embed $ T.pack <$> IO.readFile path
+  ReadFile path -> embed $ safeIOMaybe $ T.pack <$> IO.readFile path
   WriteFile path contents -> embed $ IO.writeFile path $ T.unpack contents
