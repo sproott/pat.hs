@@ -119,7 +119,17 @@ testGoPathCompleter =
             complete _ = []
         assert
           (goPathCompleter' "home/.config/" marks complete)
-          (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"]))
+          (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
+      testCase "GoPath = \"/\" gives no matches" $ do
+        marks <- verifyMarks marks
+        assert
+          (goPathCompleter' "/" marks (const []))
+          (right isEmpty),
+      testCase "GoPath starting with / gives no matches" $ do
+        marks <- verifyMarks marks
+        assert
+          (goPathCompleter' "/.config" marks (const []))
+          (right isEmpty)
     ]
   where
     goPathCompleter' :: Text -> Marks -> (Text -> [Text]) -> Either AppError [Text]
