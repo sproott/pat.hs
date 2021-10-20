@@ -13,7 +13,6 @@ import qualified Polysemy.Error as Error
 import qualified Polysemy.Reader as Reader
 import Test.Predicates
   ( Predicate (accept, explain),
-    anything,
     eq,
     isEmpty,
     left,
@@ -126,12 +125,12 @@ testGoPathCompleter =
         marks <- verifyMarks marks
         assert
           (goPathCompleter' "/" marks (const []))
-          (left anything),
+          (left $ eq InvalidGoPath),
       testCase "GoPath starting with '/' fails" $ do
         marks <- verifyMarks marks
         assert
           (goPathCompleter' "/.config" marks (const []))
-          (left anything)
+          (left $ eq InvalidGoPath)
     ]
   where
     goPathCompleter' :: Text -> Marks -> (Text -> [Text]) -> Either AppError [Text]
