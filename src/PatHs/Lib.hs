@@ -47,7 +47,7 @@ loadConfig = do
 saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
 saveConfig marks = do
   homeDir <- dirHome <$> Reader.ask
-  configPath <- dirConfig <$> Reader.ask
+  configPath <- getConfigPath
   FS.writeFile configPath $ marksToConfigString marks
 
 parseConfig :: Members '[Error AppError, Reader Dirs] r => Text -> Sem r Config
