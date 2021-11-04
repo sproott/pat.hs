@@ -4,7 +4,7 @@ import Control.Arrow (left)
 import qualified Data.Text as T
 import PatHs.Prelude hiding (many, optional)
 import System.FilePath (pathSeparator)
-import Text.Megaparsec (Parsec, many, optional, runParser)
+import Text.Megaparsec (MonadParsec (eof), Parsec, many, optional, runParser)
 import Text.Megaparsec.Char
   ( alphaNumChar,
     char,
@@ -32,12 +32,13 @@ line = do
 file :: Parser [(Text, Text)]
 file = many line
 
-splitGoPath :: Parser (Text, Maybe Text)
-splitGoPath = do
+parseGoPath :: Parser (Text, Maybe Text)
+parseGoPath = do
   key <- ident
   goPath <- optional $ do
     _ <- char pathSeparator
     many printChar
+  eof
   pure (key, T.pack <$> goPath)
 
 parse :: e -> Parser a -> Text -> Either e a

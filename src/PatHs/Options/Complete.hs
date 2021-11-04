@@ -16,7 +16,7 @@ import qualified PatHs.Effect.FileSystem as FS
 import PatHs.Lib
 import PatHs.Lib.Command
 import PatHs.Lib.Text (replacePrefix)
-import PatHs.Parser (parse, splitGoPath)
+import PatHs.Parser (parse, parseGoPath)
 import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
@@ -65,7 +65,7 @@ goPathCompleter str =
       marks <- execList CList
       pure $ completeMarks $ Map.toList marks
     else do
-      (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath splitGoPath str
+      (keyStr, goPathStr) <- Error.fromEither $ parse InvalidGoPath parseGoPath str
       marks <- execList CList
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks

@@ -11,7 +11,7 @@ import Polysemy.Error (Error)
 import qualified Polysemy.Error as Error
 import Polysemy.Reader (Reader)
 import qualified Polysemy.Reader as Reader
-import System.FilePath.Text (dropTrailingPathSeparator, (</>))
+import System.FilePath.Text ((</>))
 
 type ExecCommand (c :: CommandType) a r = Members '[Error AppError, Reader Marks] r => Command c -> Sem r a
 
@@ -53,7 +53,7 @@ execGo :: Member (Reader Dirs) r => ExecCommand Go ResolvedValue r
 execGo (CGo goPath) = do
   homeDir <- dirHome <$> Reader.ask
   goPath <- Error.note InvalidGoPath goPath
-  value <- execGet (CGet $ Key (dropTrailingPathSeparator $ unKey $ key goPath))
+  value <- execGet (CGet $ key goPath)
   pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)
 
 execList :: Member (Reader Marks) r => Command 'List -> Sem r Marks
