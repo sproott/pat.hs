@@ -2,7 +2,7 @@
 
 DIR="/usr/share/paths"
 
-paths2() {
+paths() {
   if [ "$1" = "go" ]; then
     echo "$2"
     OUTPUT=$($DIR/paths go "$2");
