@@ -51,7 +51,7 @@ execGet (CGet key) = do
 
 execGo :: Member (Reader Dirs) r => ExecCommand Go ResolvedValue r
 execGo (CGo goPath) = do
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
   goPath <- Error.note InvalidGoPath goPath
   value <- execGet (CGet $ key goPath)
   pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)

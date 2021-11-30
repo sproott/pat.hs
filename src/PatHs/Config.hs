@@ -14,7 +14,7 @@ type Config = [(Key, Value)]
 
 configParser :: Member (Reader Dirs) r => Sem r (Parser Config)
 configParser = do
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
   pure $ fmap (Key *** unResolveToHomeDir homeDir) <$> file
 
 marksToConfigString :: Marks -> Text

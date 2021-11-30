@@ -34,11 +34,11 @@ loadMarksIO :: Members '[Embed IO, Reader Dirs] r => Sem r (Either AppError Mark
 loadMarksIO = loadMarks & FS.runFileSystemIO & runError
 
 getConfigPath :: Member (Reader Dirs) r => Sem r FilePath
-getConfigPath = (</> ".bookmarks") . dirConfig <$> Reader.ask
+getConfigPath = (</> ".bookmarks") <$> Reader.asks dirConfig
 
 loadConfig :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Config
 loadConfig = do
-  configDir <- dirConfig <$> Reader.ask
+  configDir <- Reader.asks dirConfig
   FS.createDirectoryIfMissing True configDir
   configPath <- getConfigPath
   !contents <- FS.readFile configPath
@@ -46,7 +46,7 @@ loadConfig = do
 
 saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
 saveConfig marks = do
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
   configPath <- getConfigPath
   FS.writeFile configPath $ marksToConfigString marks
 
@@ -64,8 +64,8 @@ runPatHs command@CDelete {} = execDelete command >>= saveAndPrintMarks
 runPatHs command@CRename {} = execRename command >>= saveAndPrintMarks
 runPatHs command@CGet {} = do
   value <- execGet command
-  homeDir <- dirHome <$> Reader.ask
-  interactive <- envIsStdoutInteractive <$> Reader.ask
+  homeDir <- Reader.asks dirHome
+  interactive <- Reader.asks envIsStdoutInteractive
   ( if interactive
       then Output.putAnsiDoc . renderResolvedValue
       else Output.output . unResolvedValue
@@ -75,7 +75,7 @@ runPatHs command@CGo {} = do
   value <- execGo command
   Output.putStrLn $ unResolvedValue value
 runPatHs command@CList = do
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
   marks <- execList command
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks
@@ -88,7 +88,7 @@ saveAndPrintMarks marks = do
 
 resolveMarks :: Member (Reader Dirs) r => Marks -> Sem r ResolvedMarks
 resolveMarks marks = do
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
   pure $ Map.map (resolveToHomeDir homeDir . unValue) marks
 
 runWithMarks :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem (Reader Marks : r) a -> Sem r a

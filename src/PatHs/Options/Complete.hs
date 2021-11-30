@@ -80,7 +80,7 @@ goPathCompleter str =
 completeSingleMark :: Members '[Complete, Reader Dirs] r => (ValidKey, Value) -> GoPath -> Sem r [Text]
 completeSingleMark mark goPath = do
   let key = unValidKey $ fst mark
-  homeDir <- dirHome <$> Reader.ask
+  homeDir <- Reader.asks dirHome
 
   let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
   let fullPath = case path goPath of
