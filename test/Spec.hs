@@ -2,15 +2,15 @@
 
 import Data.Either.Extra (eitherToMaybe)
 import qualified Data.Map.Strict as Map
+import Effectful
+import qualified Effectful.Reader.Static as Reader
 import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
+import qualified PatHs.Effect.Error as Error
 import PatHs.Options.Complete (goPathCompleter, keyCompleter)
 import PatHs.Prelude hiding (Predicate, just, left, right)
 import PatHs.Types
 import PatHs.Types.Env
-import Polysemy (Sem, interpret, run)
-import qualified Polysemy.Error as Error
-import qualified Polysemy.Reader as Reader
 import Test.Predicates
   ( Predicate (accept, explain),
     eq,
@@ -73,7 +73,7 @@ testKeyCompleter =
     ]
   where
     keyCompleter' :: Text -> Marks -> [Text]
-    keyCompleter' str marks = keyCompleter str & Reader.runReader dirs & Reader.runReader marks & run
+    keyCompleter' str marks = keyCompleter str & Reader.runReader dirs & Reader.runReader marks & runPureEff
 
 testGoPathCompleter :: TestTree
 testGoPathCompleter =
@@ -139,8 +139,8 @@ testGoPathCompleter =
         & Reader.runReader dirs
         & Reader.runReader marks
         & runCompletePure complete
-        & Error.runError
-        & run
+        & Error.runError_
+        & runPureEff
 
 marks :: [(Text, Text)]
 marks = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
@@ -167,6 +167,6 @@ equivalent = unorderedElemsAre . fmap eq
 assert :: a -> Predicate a -> Assertion
 assert x p = if accept p x then pure () else assertFailure $ explain p x
 
-runCompletePure :: (Text -> [Text]) -> Sem (Complete : r) a -> Sem r a
-runCompletePure complete = interpret $ \case
+runCompletePure :: (Text -> [Text]) -> Eff (Complete ': es) a -> Eff es a
+runCompletePure complete = interpret $ \_ -> \case
   Complete.CompleteDirectory str -> pure $ complete str

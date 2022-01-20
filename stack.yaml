@@ -42,8 +42,8 @@ packages:
 #
 extra-deps:
   - explainable-predicates-0.1.2.0@sha256:f50494313c1a303271fff01c3e858b7ac364521abb879898b36a10e3b7b678ab,3749
-  - github: arybczak/effectful
-    commit: e9be11ec465be84100d04866427ebcec150f838b
+  - github: sproott/effectful
+    commit: c4671e76b9016aaa8aedbf4edac84cde49eb99df
     subdirs:
       - effectful-core
       - effectful

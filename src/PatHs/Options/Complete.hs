@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module PatHs.Options.Complete
   ( mkCompleter',
     keyCompleter,
@@ -8,9 +10,14 @@ where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
+import Effectful
+import Effectful.Reader.Static (Reader)
+import qualified Effectful.Reader.Static as Reader
 import Options.Applicative (Completer, mkCompleter)
 import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
+import PatHs.Effect.Error (Error)
+import qualified PatHs.Effect.Error as Error
 import PatHs.Effect.FileSystem (FileSystem)
 import qualified PatHs.Effect.FileSystem as FS
 import PatHs.Lib
@@ -20,22 +27,17 @@ import PatHs.Parser (parse, parseGoPath)
 import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
-import Polysemy (Embed, Member, Members, Sem, embed, runM)
-import Polysemy.Error (Error)
-import qualified Polysemy.Error as Error
-import Polysemy.Reader (Reader)
-import qualified Polysemy.Reader as Reader
 import System.FilePath.Text
   ( addTrailingPathSeparator,
     (</>),
   )
 
-type MyCompleter r = Text -> Sem r [Text]
+type MyCompleter es = Text -> Eff es [Text]
 
-mkCompleter' :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Completer
+mkCompleter' :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, IOE] -> Completer
 mkCompleter' completer = mkCompleter $ \str -> fmap (fmap T.unpack) $ runCompleterIO completer $ T.pack str
 
-runCompleterIO :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, Embed IO] -> Text -> IO [Text]
+runCompleterIO :: MyCompleter '[Reader Marks, FileSystem, Reader Dirs, Error AppError, IOE] -> Text -> IO [Text]
 runCompleterIO completer str = do
   dirs <- dirsIO
   completions <-
@@ -43,22 +45,22 @@ runCompleterIO completer str = do
       & runWithMarks
       & FS.runFileSystemIO
       & Reader.runReader dirs
-      & Error.runError @AppError
-      & runM
+      & Error.runError_ @AppError
+      & runEff
   pure $ fromRight [] completions
 
-keyCompleter :: Member (Reader Marks) r => MyCompleter r
+keyCompleter :: Reader Marks :> es => MyCompleter es
 keyCompleter str = do
   marks <- execList CList
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleterIO :: Members '[Embed IO, Reader Marks] r => MyCompleter r
+goPathCompleterIO :: '[IOE, Reader Marks] ::> es => MyCompleter es
 goPathCompleterIO str = do
-  dirs <- embed dirsIO
-  completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runError
+  dirs <- liftIO dirsIO
+  completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runError_ @AppError
   pure $ fromRight [] completions
 
-goPathCompleter :: Members '[Complete, Error AppError, Reader Dirs, Reader Marks] r => MyCompleter r
+goPathCompleter :: '[Complete, Error AppError, Reader Dirs, Reader Marks] ::> es => MyCompleter es
 goPathCompleter str =
   if T.null str
     then do
@@ -77,7 +79,7 @@ goPathCompleter str =
     completeMarks matchingMarks = addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
     filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
-completeSingleMark :: Members '[Complete, Reader Dirs] r => (ValidKey, Value) -> GoPath -> Sem r [Text]
+completeSingleMark :: '[Complete, Reader Dirs] ::> es => (ValidKey, Value) -> GoPath -> Eff es [Text]
 completeSingleMark mark goPath = do
   let key = unValidKey $ fst mark
   homeDir <- Reader.asks dirHome
