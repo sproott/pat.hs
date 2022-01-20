@@ -3,6 +3,7 @@
 module PatHs.Lib.Command where
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as T
 import Effectful
 import Effectful.Reader.Static (Reader)
 import qualified Effectful.Reader.Static as Reader
@@ -19,7 +20,7 @@ type ExecCommand (c :: CommandType) a es = '[Error AppError, Reader Marks] ::> e
 validateKey' :: Error AppError :> es => Key -> Eff es ValidKey
 validateKey' = Error.fromEither . validateKey
 
-execSave :: Member (Reader Dirs) r => ExecCommand Save Marks r
+execSave :: Reader Dirs :> es => ExecCommand Save Marks es
 execSave (CSave key forceOverwrite) = do
   marks <- Reader.ask
   validKey <- validateKey' key
@@ -30,14 +31,14 @@ execSave (CSave key forceOverwrite) = do
       value <- unResolveToHomeDir homeDir . T.pack <$> Reader.asks dirCurrent
       pure $ Map.insert validKey value marks
 
-execDelete :: ExecCommand Delete Marks r
+execDelete :: ExecCommand Delete Marks es
 execDelete (CDelete key) = do
   marks <- Reader.ask
   _ <- execGet (CGet key)
   validKey <- validateKey' key
   pure $ Map.delete validKey marks
 
-execRename :: ExecCommand Rename Marks r
+execRename :: ExecCommand Rename Marks es
 execRename (CRename key newKey) = do
   marks <- Reader.ask
   value <- execGet (CGet key)
@@ -45,7 +46,7 @@ execRename (CRename key newKey) = do
   validNewKey <- validateKey' newKey
   pure $ Map.insert validNewKey value $ Map.delete validKey marks
 
-execGet :: ExecCommand Get Value r
+execGet :: ExecCommand Get Value es
 execGet (CGet key) = do
   marks <- Reader.ask
   validKey <- validateKey' key
