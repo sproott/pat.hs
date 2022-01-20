@@ -18,7 +18,7 @@
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
 resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/11.yaml
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/22.yaml
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -42,6 +42,11 @@ packages:
 #
 extra-deps:
   - explainable-predicates-0.1.2.0@sha256:f50494313c1a303271fff01c3e858b7ac364521abb879898b36a10e3b7b678ab,3749
+  - github: arybczak/effectful
+    commit: e9be11ec465be84100d04866427ebcec150f838b
+    subdirs:
+      - effectful-core
+      - effectful
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
