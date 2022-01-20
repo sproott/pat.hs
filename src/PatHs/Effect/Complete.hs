@@ -3,16 +3,19 @@
 module PatHs.Effect.Complete where
 
 import qualified Data.Text as T
+import Effectful
 import Options.Applicative (bashCompleter)
 import Options.Applicative.Types (runCompleter)
 import PatHs.Prelude
-import Polysemy (Embed, Member, Sem, embed, interpret, makeSem)
 
-data Complete m a where
+data Complete :: Effect where
   CompleteDirectory :: Text -> Complete m [Text]
 
-makeSem ''Complete
+type instance DispatchOf Complete = 'Dynamic
 
-runCompleteIO :: Member (Embed IO) r => Sem (Complete : r) a -> Sem r a
-runCompleteIO = interpret $ \case
-  CompleteDirectory directory -> embed $ fmap (fmap T.pack) $ runCompleter (bashCompleter "directory") $ T.unpack directory
+completeDirectory :: Complete :> es => Text -> Eff es [Text]
+completeDirectory = send . CompleteDirectory
+
+runCompleteIO :: IOE :> es => Eff (Complete ': es) a -> Eff es a
+runCompleteIO = interpret $ \_ -> \case
+  CompleteDirectory directory -> liftIO $ fmap (fmap T.pack) $ runCompleter (bashCompleter "directory") $ T.unpack directory

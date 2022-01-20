@@ -1,20 +1,31 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module PatHs.Effect.Output (putAnsiDoc, putStrLn, runOutputIO, module Output) where
+module PatHs.Effect.Output (Output, output, putAnsiDoc, putStrLn, runOutputIO) where
 
 import qualified Data.Text as T
+import Effectful
 import PatHs.Prelude hiding (putStr, putStrLn)
 import qualified PatHs.Prelude as IO (putStr)
-import Polysemy (Embed, Member, Sem)
-import Polysemy.Output as Output
 import Prettyprinter (Doc, defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Terminal (AnsiStyle, renderStrict)
 
-putAnsiDoc :: Member (Output Text) r => Doc AnsiStyle -> Sem r ()
-putAnsiDoc = Output.output . renderStrict . layoutPretty defaultLayoutOptions
+data Output o :: Effect where
+  Output :: o -> Output o m ()
 
-putStrLn :: Member (Output Text) r => Text -> Sem r ()
-putStrLn = Output.output . (<> "\n")
+type instance DispatchOf (Output o) = 'Dynamic
 
-runOutputIO :: Member (Embed IO) r => Sem (Output Text : r) a -> Sem r a
-runOutputIO = runOutputSem (IO.putStr . T.unpack)
+output :: (HasCallStack, Output o :> es) => o -> Eff es ()
+output = send . Output
+
+putAnsiDoc :: Output Text :> es => Doc AnsiStyle -> Eff es ()
+putAnsiDoc = output . renderStrict . layoutPretty defaultLayoutOptions
+
+putStrLn :: Output Text :> es => Text -> Eff es ()
+putStrLn = output . (<> "\n")
+
+runOutput :: (o -> Eff es ()) -> Eff (Output o ': es) a -> Eff es a
+runOutput fn = interpret $ \_ -> \case
+  Output o -> fn o
+
+runOutputIO :: IOE :> es => Eff (Output Text ': es) a -> Eff es a
+runOutputIO = runOutput (IO.putStr . T.unpack)

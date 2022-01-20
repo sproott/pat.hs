@@ -27,6 +27,7 @@ library
   exposed-modules:
       PatHs.Config
       PatHs.Effect.Complete
+      PatHs.Effect.Error
       PatHs.Effect.FileSystem
       PatHs.Effect.Output
       PatHs.Lib
@@ -45,19 +46,18 @@ library
   hs-source-dirs:
       src
   default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
       DataKinds
       FlexibleContexts
       GADTs
+      KindSignatures
       LambdaCase
-      PolyKinds
+      NoImplicitPrelude
+      OverloadedStrings
       RankNTypes
-      ScopedTypeVariables
       TypeApplications
-      TypeOperators
       TypeFamilies
-  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors
   build-depends:
       base >=4.7 && <5
     , containers
@@ -68,8 +68,6 @@ library
     , filepath
     , megaparsec
     , optparse-applicative
-    , polysemy
-    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
     , relude
@@ -86,19 +84,18 @@ executable paths
   hs-source-dirs:
       app
   default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
       DataKinds
       FlexibleContexts
       GADTs
+      KindSignatures
       LambdaCase
-      PolyKinds
+      NoImplicitPrelude
+      OverloadedStrings
       RankNTypes
-      ScopedTypeVariables
       TypeApplications
-      TypeOperators
       TypeFamilies
-  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
@@ -110,8 +107,6 @@ executable paths
     , megaparsec
     , optparse-applicative
     , paths-bookmarks
-    , polysemy
-    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
     , relude
@@ -129,19 +124,18 @@ test-suite paths-test
   hs-source-dirs:
       test
   default-extensions:
-      NoImplicitPrelude
-      OverloadedStrings
       DataKinds
       FlexibleContexts
       GADTs
+      KindSignatures
       LambdaCase
-      PolyKinds
+      NoImplicitPrelude
+      OverloadedStrings
       RankNTypes
-      ScopedTypeVariables
       TypeApplications
-      TypeOperators
       TypeFamilies
-  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors -O2 -flate-specialise -fspecialise-aggressively -fplugin=Polysemy.Plugin -threaded -rtsopts -with-rtsopts=-N
+      TypeOperators
+  ghc-options: -Wall -Wcompat -Wno-unticked-promoted-constructors -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
     , containers
@@ -154,8 +148,6 @@ test-suite paths-test
     , megaparsec
     , optparse-applicative
     , paths-bookmarks
-    , polysemy
-    , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
     , relude

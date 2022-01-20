@@ -4,7 +4,12 @@
 module PatHs.Lib where
 
 import qualified Data.Map.Strict as Map
+import Effectful
+import Effectful.Reader.Static (Reader)
+import qualified Effectful.Reader.Static as Reader
 import PatHs.Config
+import PatHs.Effect.Error (Error)
+import qualified PatHs.Effect.Error as Error
 import PatHs.Effect.FileSystem (FileSystem)
 import qualified PatHs.Effect.FileSystem as FS
 import PatHs.Effect.Output (Output)
@@ -15,28 +20,23 @@ import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
 import PatHs.Types.Env
-import Polysemy (Embed, Member, Members, Sem)
-import Polysemy.Error (Error, runError)
-import qualified Polysemy.Error as Error
-import Polysemy.Reader (Reader)
-import qualified Polysemy.Reader as Reader
 import System.Directory (getCurrentDirectory)
 import System.Environment.XDG.BaseDir (getUserDataDir)
 import System.FilePath ((</>))
 import System.Posix (queryTerminal, stdOutput)
 
-loadMarks :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Marks
+loadMarks :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff es Marks
 loadMarks = do
   config <- loadConfig
   Error.fromEither $ Map.fromList <$> convertKeys validateKey config
 
-loadMarksIO :: Members '[Embed IO, Reader Dirs] r => Sem r (Either AppError Marks)
-loadMarksIO = loadMarks & FS.runFileSystemIO & runError
+loadMarksIO :: '[IOE, Reader Dirs] ::> es => Eff es (Either AppError Marks)
+loadMarksIO = loadMarks & FS.runFileSystemIO & Error.runError_
 
-getConfigPath :: Member (Reader Dirs) r => Sem r FilePath
+getConfigPath :: Reader Dirs :> es => Eff es FilePath
 getConfigPath = (</> ".bookmarks") <$> Reader.asks dirConfig
 
-loadConfig :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem r Config
+loadConfig :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff es Config
 loadConfig = do
   configDir <- Reader.asks dirConfig
   FS.createDirectoryIfMissing True configDir
@@ -44,12 +44,12 @@ loadConfig = do
   !contents <- FS.readFile configPath
   parseConfig $ fromMaybe "" contents
 
-saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
+saveConfig :: '[FileSystem, Reader Dirs] ::> es => Marks -> Eff es ()
 saveConfig marks = do
   configPath <- getConfigPath
   FS.writeFile configPath $ marksToConfigString marks
 
-parseConfig :: Members '[Error AppError, Reader Dirs] r => Text -> Sem r Config
+parseConfig :: '[Error AppError, Reader Dirs] ::> es => Text -> Eff es Config
 parseConfig input = do
   configParser' <- configParser
   Error.fromEither $ parse (ConfigError CEInvalid) configParser' input
@@ -57,7 +57,7 @@ parseConfig input = do
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
 
-runPatHs :: Members '[Error AppError, FileSystem, Output Text, Reader Dirs, Reader Env, Reader Marks] r => Command c -> Sem r ()
+runPatHs :: '[Error AppError, FileSystem, Output Text, Reader Dirs, Reader Env, Reader Marks] ::> es => Command c -> Eff es ()
 runPatHs command@CSave {} = execSave command >>= saveAndPrintMarks
 runPatHs command@CDelete {} = execDelete command >>= saveAndPrintMarks
 runPatHs command@CRename {} = execRename command >>= saveAndPrintMarks
@@ -78,18 +78,18 @@ runPatHs command@CList = do
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks
 
-saveAndPrintMarks :: Members '[FileSystem, Output Text, Reader Dirs] r => Marks -> Sem r ()
+saveAndPrintMarks :: '[FileSystem, Output Text, Reader Dirs] ::> es => Marks -> Eff es ()
 saveAndPrintMarks marks = do
   saveConfig marks
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks
 
-resolveMarks :: Member (Reader Dirs) r => Marks -> Sem r ResolvedMarks
+resolveMarks :: Reader Dirs :> es => Marks -> Eff es ResolvedMarks
 resolveMarks marks = do
   homeDir <- Reader.asks dirHome
   pure $ Map.map (resolveToHomeDir homeDir . unValue) marks
 
-runWithMarks :: Members '[Error AppError, FileSystem, Reader Dirs] r => Sem (Reader Marks : r) a -> Sem r a
+runWithMarks :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff (Reader Marks ': es) a -> Eff es a
 runWithMarks f = do
   marks <- loadMarks
   f & Reader.runReader marks
