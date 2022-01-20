@@ -71,7 +71,6 @@ library
     , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
-    , protolude
     , relude
     , text
     , transformers
@@ -113,7 +112,6 @@ executable paths
     , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
-    , protolude
     , relude
     , text
     , transformers
@@ -157,7 +155,6 @@ test-suite paths-test
     , polysemy-plugin
     , prettyprinter
     , prettyprinter-ansi-terminal
-    , protolude
     , relude
     , tasty
     , tasty-hunit

@@ -32,7 +32,6 @@ dependencies:
   - polysemy-plugin
   - prettyprinter
   - prettyprinter-ansi-terminal
-  - protolude
   - relude
   - text
   - transformers
