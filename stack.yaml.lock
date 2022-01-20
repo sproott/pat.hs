@@ -3,7 +3,33 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    size: 52898
+    subdir: effectful-core
+    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    name: effectful-core
+    version: '0.1'
+    sha256: 9e8e738b4070c63a1ab469b033f896c0722aa1b8c3b3f8a1824e81964c24fc19
+    pantry-tree:
+      size: 1701
+      sha256: 79abd02230d3fcc243d7aac07c42958d3812380d231e9a08c0c72a4f44120180
+  original:
+    subdir: effectful-core
+    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+- completed:
+    size: 52898
+    subdir: effectful
+    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    name: effectful
+    version: '0.1'
+    sha256: 9e8e738b4070c63a1ab469b033f896c0722aa1b8c3b3f8a1824e81964c24fc19
+    pantry-tree:
+      size: 2232
+      sha256: 64694556ef4c57b709e57c9cef7254bc94aeab58d32b341b1a228f2587461c9e
+  original:
+    subdir: effectful
+    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
 snapshots:
 - completed:
     size: 619163

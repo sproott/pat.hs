@@ -62,6 +62,7 @@ library
       base >=4.7 && <5
     , containers
     , directory
+    , effectful
     , either
     , extra
     , filepath
@@ -102,6 +103,7 @@ executable paths
       base >=4.7 && <5
     , containers
     , directory
+    , effectful
     , either
     , extra
     , filepath
@@ -144,6 +146,7 @@ test-suite paths-test
       base >=4.7 && <5
     , containers
     , directory
+    , effectful
     , either
     , explainable-predicates
     , extra
