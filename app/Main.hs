@@ -1,6 +1,5 @@
 module Main where
 
-import qualified Data.Text as T
 import Effectful
 import qualified Effectful.Reader.Static as Reader
 import Options.Applicative (execParser)
