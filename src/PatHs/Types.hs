@@ -69,7 +69,7 @@ deriving instance Show (Command c)
 
 data SomeCommand = forall (c :: CommandType). SomeCommand (Command c)
 
-data AppError = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show, Typeable)
+data AppError = ConfigError ConfigError | InvalidGoPath | AlreadyExists Key Value | MalformedKey Key | NotExists Key deriving (Eq, Show)
 
 data ConfigError = CERead | CEWrite | CEInvalid deriving (Eq, Show)
 

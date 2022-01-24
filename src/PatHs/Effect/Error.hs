@@ -5,13 +5,13 @@ import Effectful
 import Effectful.Error.Static
 import PatHs.Prelude
 
-fromEither :: (Typeable e, Error e :> es) => Either e a -> Eff es a
+fromEither :: Error e :> es => Either e a -> Eff es a
 fromEither (Right a) = pure a
 fromEither (Left e) = throwError e
 
-note :: (Typeable e, Error e :> es) => e -> Maybe a -> Eff es a
+note :: Error e :> es => e -> Maybe a -> Eff es a
 note _ (Just a) = pure a
 note e _ = throwError e
 
-runError_ :: Typeable e => Eff (Error e ': es) a -> Eff es (Either e a)
+runError_ :: Eff (Error e ': es) a -> Eff es (Either e a)
 runError_ = fmap (left snd) . runError

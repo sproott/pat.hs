@@ -54,13 +54,13 @@ keyCompleter str = do
   marks <- execList CList
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleterIO :: '[IOE, Reader Marks] ::> es => MyCompleter es
+goPathCompleterIO :: '[IOE, Reader Marks] :>> es => MyCompleter es
 goPathCompleterIO str = do
   dirs <- liftIO dirsIO
   completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runError_ @AppError
   pure $ fromRight [] completions
 
-goPathCompleter :: '[Complete, Error AppError, Reader Dirs, Reader Marks] ::> es => MyCompleter es
+goPathCompleter :: '[Complete, Error AppError, Reader Dirs, Reader Marks] :>> es => MyCompleter es
 goPathCompleter str =
   if T.null str
     then do
@@ -79,7 +79,7 @@ goPathCompleter str =
     completeMarks matchingMarks = addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
     filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
-completeSingleMark :: '[Complete, Reader Dirs] ::> es => (ValidKey, Value) -> GoPath -> Eff es [Text]
+completeSingleMark :: '[Complete, Reader Dirs] :>> es => (ValidKey, Value) -> GoPath -> Eff es [Text]
 completeSingleMark mark goPath = do
   let key = unValidKey $ fst mark
   homeDir <- Reader.asks dirHome

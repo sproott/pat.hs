@@ -4,6 +4,7 @@ module PatHs.Effect.Complete where
 
 import qualified Data.Text as T
 import Effectful
+import Effectful.Dispatch.Dynamic
 import Options.Applicative (bashCompleter)
 import Options.Applicative.Types (runCompleter)
 import PatHs.Prelude
