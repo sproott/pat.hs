@@ -12,31 +12,31 @@ packages:
   original:
     hackage: explainable-predicates-0.1.2.0@sha256:f50494313c1a303271fff01c3e858b7ac364521abb879898b36a10e3b7b678ab,3749
 - completed:
-    size: 52939
+    size: 56255
     subdir: effectful-core
-    url: https://github.com/sproott/effectful/archive/c4671e76b9016aaa8aedbf4edac84cde49eb99df.tar.gz
+    url: https://github.com/arybczak/effectful/archive/da73cb6e548f682750aba62ec830792f1b9d8235.tar.gz
     name: effectful-core
     version: '0.1'
-    sha256: dc023fabb255c5f1a0c6dd6f10420dd8c4d0a3a5473271aa80c9a94289586afa
+    sha256: 28209ba0711ada7aa7e419994ec942f86af6fad4817ae9d5c8bdf9d22b5c5d6a
     pantry-tree:
-      size: 1701
-      sha256: 10e5fed7dda48de4820aac0a18089ec2ecd750e8daf43c1d50750533040ac22b
+      size: 1641
+      sha256: 40735787f16a6713d85fae3db51ca0dc3a45c6c248bdd7be0d1cbd393052bb67
   original:
     subdir: effectful-core
-    url: https://github.com/sproott/effectful/archive/c4671e76b9016aaa8aedbf4edac84cde49eb99df.tar.gz
+    url: https://github.com/arybczak/effectful/archive/da73cb6e548f682750aba62ec830792f1b9d8235.tar.gz
 - completed:
-    size: 52939
+    size: 56255
     subdir: effectful
-    url: https://github.com/sproott/effectful/archive/c4671e76b9016aaa8aedbf4edac84cde49eb99df.tar.gz
+    url: https://github.com/arybczak/effectful/archive/da73cb6e548f682750aba62ec830792f1b9d8235.tar.gz
     name: effectful
     version: '0.1'
-    sha256: dc023fabb255c5f1a0c6dd6f10420dd8c4d0a3a5473271aa80c9a94289586afa
+    sha256: 28209ba0711ada7aa7e419994ec942f86af6fad4817ae9d5c8bdf9d22b5c5d6a
     pantry-tree:
       size: 2232
-      sha256: 64694556ef4c57b709e57c9cef7254bc94aeab58d32b341b1a228f2587461c9e
+      sha256: a13fbde119275269836a6de98a6610cb9fcf1ddbe5056da0c70d44e3936c7f30
   original:
     subdir: effectful
-    url: https://github.com/sproott/effectful/archive/c4671e76b9016aaa8aedbf4edac84cde49eb99df.tar.gz
+    url: https://github.com/arybczak/effectful/archive/da73cb6e548f682750aba62ec830792f1b9d8235.tar.gz
 snapshots:
 - completed:
     size: 586120

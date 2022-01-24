@@ -1,9 +1,8 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module PatHs.Effect.FileSystem where
 
 import qualified Data.Text as T
 import Effectful
+import Effectful.Dispatch.Dynamic
 import PatHs.Prelude
 import qualified PatHs.Prelude as IO (readFile, writeFile)
 import qualified System.Directory as IO (createDirectoryIfMissing)

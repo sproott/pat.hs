@@ -1,9 +1,8 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module PatHs.Effect.Output (Output, output, putAnsiDoc, putStrLn, runOutputIO) where
 
 import qualified Data.Text as T
 import Effectful
+import Effectful.Dispatch.Dynamic
 import PatHs.Prelude hiding (putStr, putStrLn)
 import qualified PatHs.Prelude as IO (putStr)
 import Prettyprinter (Doc, defaultLayoutOptions, layoutPretty)

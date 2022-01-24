@@ -25,18 +25,18 @@ import System.Environment.XDG.BaseDir (getUserDataDir)
 import System.FilePath ((</>))
 import System.Posix (queryTerminal, stdOutput)
 
-loadMarks :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff es Marks
+loadMarks :: '[Error AppError, FileSystem, Reader Dirs] :>> es => Eff es Marks
 loadMarks = do
   config <- loadConfig
   Error.fromEither $ Map.fromList <$> convertKeys validateKey config
 
-loadMarksIO :: '[IOE, Reader Dirs] ::> es => Eff es (Either AppError Marks)
+loadMarksIO :: '[IOE, Reader Dirs] :>> es => Eff es (Either AppError Marks)
 loadMarksIO = loadMarks & FS.runFileSystemIO & Error.runError_
 
 getConfigPath :: Reader Dirs :> es => Eff es FilePath
 getConfigPath = (</> ".bookmarks") <$> Reader.asks dirConfig
 
-loadConfig :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff es Config
+loadConfig :: '[Error AppError, FileSystem, Reader Dirs] :>> es => Eff es Config
 loadConfig = do
   configDir <- Reader.asks dirConfig
   FS.createDirectoryIfMissing True configDir
@@ -44,12 +44,12 @@ loadConfig = do
   !contents <- FS.readFile configPath
   parseConfig $ fromMaybe "" contents
 
-saveConfig :: '[FileSystem, Reader Dirs] ::> es => Marks -> Eff es ()
+saveConfig :: '[FileSystem, Reader Dirs] :>> es => Marks -> Eff es ()
 saveConfig marks = do
   configPath <- getConfigPath
   FS.writeFile configPath $ marksToConfigString marks
 
-parseConfig :: '[Error AppError, Reader Dirs] ::> es => Text -> Eff es Config
+parseConfig :: '[Error AppError, Reader Dirs] :>> es => Text -> Eff es Config
 parseConfig input = do
   configParser' <- configParser
   Error.fromEither $ parse (ConfigError CEInvalid) configParser' input
@@ -57,7 +57,7 @@ parseConfig input = do
 convertKeys :: (a -> Either e a') -> [(a, b)] -> Either e [(a', b)]
 convertKeys f = traverse $ bitraverse f pure
 
-runPatHs :: '[Error AppError, FileSystem, Output Text, Reader Dirs, Reader Env, Reader Marks] ::> es => Command c -> Eff es ()
+runPatHs :: '[Error AppError, FileSystem, Output Text, Reader Dirs, Reader Env, Reader Marks] :>> es => Command c -> Eff es ()
 runPatHs command@CSave {} = execSave command >>= saveAndPrintMarks
 runPatHs command@CDelete {} = execDelete command >>= saveAndPrintMarks
 runPatHs command@CRename {} = execRename command >>= saveAndPrintMarks
@@ -78,7 +78,7 @@ runPatHs command@CList = do
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks
 
-saveAndPrintMarks :: '[FileSystem, Output Text, Reader Dirs] ::> es => Marks -> Eff es ()
+saveAndPrintMarks :: '[FileSystem, Output Text, Reader Dirs] :>> es => Marks -> Eff es ()
 saveAndPrintMarks marks = do
   saveConfig marks
   resolvedMarks <- resolveMarks marks
@@ -89,7 +89,7 @@ resolveMarks marks = do
   homeDir <- Reader.asks dirHome
   pure $ Map.map (resolveToHomeDir homeDir . unValue) marks
 
-runWithMarks :: '[Error AppError, FileSystem, Reader Dirs] ::> es => Eff (Reader Marks ': es) a -> Eff es a
+runWithMarks :: '[Error AppError, FileSystem, Reader Dirs] :>> es => Eff (Reader Marks ': es) a -> Eff es a
 runWithMarks f = do
   marks <- loadMarks
   f & Reader.runReader marks
