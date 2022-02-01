@@ -35,5 +35,5 @@ app = do
     & Output.runOutputIO
     & Reader.runReader dirs
     & Reader.runReader env
-    & Error.runError_
+    & Error.runErrorNoCallStack
     & runEff

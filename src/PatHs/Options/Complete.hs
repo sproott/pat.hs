@@ -45,7 +45,7 @@ runCompleterIO completer str = do
       & runWithMarks
       & FS.runFileSystemIO
       & Reader.runReader dirs
-      & Error.runError_ @AppError
+      & Error.runErrorNoCallStack @AppError
       & runEff
   pure $ fromRight [] completions
 
@@ -57,7 +57,7 @@ keyCompleter str = do
 goPathCompleterIO :: '[IOE, Reader Marks] :>> es => MyCompleter es
 goPathCompleterIO str = do
   dirs <- liftIO dirsIO
-  completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runError_ @AppError
+  completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runErrorNoCallStack @AppError
   pure $ fromRight [] completions
 
 goPathCompleter :: '[Complete, Error AppError, Reader Dirs, Reader Marks] :>> es => MyCompleter es

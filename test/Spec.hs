@@ -139,7 +139,7 @@ testGoPathCompleter =
         & Reader.runReader dirs
         & Reader.runReader marks
         & runCompletePure complete
-        & Error.runError_
+        & Error.runErrorNoCallStack
         & runPureEff
 
 marks :: [(Text, Text)]
