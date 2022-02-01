@@ -31,7 +31,7 @@ loadMarks = do
   Error.fromEither $ Map.fromList <$> convertKeys validateKey config
 
 loadMarksIO :: '[IOE, Reader Dirs] :>> es => Eff es (Either AppError Marks)
-loadMarksIO = loadMarks & FS.runFileSystemIO & Error.runError_
+loadMarksIO = loadMarks & FS.runFileSystemIO & Error.runErrorNoCallStack
 
 getConfigPath :: Reader Dirs :> es => Eff es FilePath
 getConfigPath = (</> ".bookmarks") <$> Reader.asks dirConfig
