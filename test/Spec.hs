@@ -3,6 +3,7 @@
 import Data.Either.Extra (eitherToMaybe)
 import qualified Data.Map.Strict as Map
 import Effectful
+import Effectful.Dispatch.Dynamic
 import qualified Effectful.Reader.Static as Reader
 import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
