@@ -56,7 +56,7 @@ library:
   source-dirs: src
 
 ghc-options:
-  - -Wunused-imports
+  - -Wall -Wcompat -Wno-unticked-promoted-constructors
   - -O2 -flate-specialise -fspecialise-aggressively
   - -fplugin=Polysemy.Plugin
 

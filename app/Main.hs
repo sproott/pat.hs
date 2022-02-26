@@ -30,7 +30,7 @@ app = do
   dirs <- dirsIO
   env <- envIO
   let homeDir = dirHome dirs
-  (SomeCommand command) <- execParser (commandP homeDir $ unResolveToHomeDir homeDir (T.pack $ dirCurrent dirs))
+  (SomeCommand command) <- execParser (commandP $ unResolveToHomeDir homeDir (T.pack $ dirCurrent dirs))
   runPatHs command
     & runWithMarks
     & FS.runFileSystemIO

@@ -46,7 +46,6 @@ loadConfig = do
 
 saveConfig :: Members '[FileSystem, Reader Dirs] r => Marks -> Sem r ()
 saveConfig marks = do
-  homeDir <- Reader.asks dirHome
   configPath <- getConfigPath
   FS.writeFile configPath $ marksToConfigString marks
 
@@ -75,7 +74,6 @@ runPatHs command@CGo {} = do
   value <- execGo command
   Output.putStrLn $ unResolvedValue value
 runPatHs command@CList = do
-  homeDir <- Reader.asks dirHome
   marks <- execList command
   resolvedMarks <- resolveMarks marks
   Output.putAnsiDoc $ renderMarks resolvedMarks

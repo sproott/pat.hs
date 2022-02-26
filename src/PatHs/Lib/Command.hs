@@ -23,13 +23,13 @@ execSave (CSave key value) = do
   marks <- Reader.ask
   validKey <- validateKey' key
   case Map.lookup validKey marks of
-    Just value -> Error.throw $ AlreadyExists key value
+    Just val -> Error.throw $ AlreadyExists key val
     Nothing -> pure $ Map.insert validKey value marks
 
 execDelete :: ExecCommand Delete Marks r
 execDelete (CDelete key) = do
   marks <- Reader.ask
-  execGet (CGet key)
+  _ <- execGet (CGet key)
   validKey <- validateKey' key
   pure $ Map.delete validKey marks
 
@@ -50,11 +50,11 @@ execGet (CGet key) = do
     Just value -> pure value
 
 execGo :: Member (Reader Dirs) r => ExecCommand Go ResolvedValue r
-execGo (CGo goPath) = do
+execGo (CGo maybeGoPath) = do
   homeDir <- Reader.asks dirHome
-  goPath <- Error.note InvalidGoPath goPath
-  value <- execGet (CGet $ key goPath)
-  pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (path goPath)
+  goPath <- Error.note InvalidGoPath maybeGoPath
+  value <- execGet (CGet $ gpKey goPath)
+  pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (gpPath goPath)
 
 execList :: Member (Reader Marks) r => Command 'List -> Sem r Marks
 execList CList = Reader.ask

@@ -70,7 +70,7 @@ goPathCompleter str =
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks
       let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)
-      case (length matchingMarks == 1 || isJust (path goPath), exactMatch) of
+      case (length matchingMarks == 1 || isJust (gpPath goPath), exactMatch) of
         (True, Just mark) -> completeSingleMark mark goPath
         _ -> pure $ completeMarks matchingMarks
   where
@@ -83,7 +83,7 @@ completeSingleMark mark goPath = do
   homeDir <- Reader.asks dirHome
 
   let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-  let fullPath = case path goPath of
+  let fullPath = case gpPath goPath of
         Just goPathStr -> value </> goPathStr
         Nothing -> value
 
@@ -93,4 +93,4 @@ completeSingleMark mark goPath = do
       newCompletions <-
         Complete.completeDirectory $ addTrailingPathSeparator $ value </> dir
       pure $ dir : newCompletions
-    dirs -> pure dirs
+    _ -> pure dirs

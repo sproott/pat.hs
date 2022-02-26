@@ -26,7 +26,7 @@ line = do
   key <- ident
   _ <- char '='
   value <- many printChar
-  eol
+  _ <- eol
   pure (key, T.pack value)
 
 file :: Parser [(Text, Text)]
@@ -42,4 +42,4 @@ parseGoPath = do
   pure (key, T.pack <$> goPath)
 
 parse :: e -> Parser a -> Text -> Either e a
-parse error parser contents = left (const error) $ runParser parser empty contents
+parse err parser contents = left (const err) $ runParser parser empty contents

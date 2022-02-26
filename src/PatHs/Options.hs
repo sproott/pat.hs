@@ -6,23 +6,23 @@ import PatHs.Options.Complete
 import PatHs.Prelude
 import PatHs.Types
 
-commandP :: HomeDir -> Value -> ParserInfo SomeCommand
-commandP homeDir currentDirectory =
+commandP :: Value -> ParserInfo SomeCommand
+commandP currentDirectory =
   info
-    (commandParser homeDir currentDirectory <**> helper)
+    (commandParser currentDirectory <**> helper)
     ( fullDesc
         <> progDesc "Save often used directories like bookmarks"
         <> header "pat.hs - a terminal directory bookmark utility"
     )
 
-commandParser :: HomeDir -> Value -> Parser SomeCommand
-commandParser homeDir currentDirectory =
+commandParser :: Value -> Parser SomeCommand
+commandParser currentDirectory =
   subparser
     ( command "save" (mkCommand (saveP currentDirectory) "Save bookmark")
         <> command "delete" (mkCommand deleteP "Delete bookmark")
         <> command "rename" (mkCommand renameP "Rename bookmark")
         <> command "get" (mkCommand getP "Get bookmark")
-        <> command "go" (mkCommand (goP homeDir) "Go to a directory related to bookmark")
+        <> command "go" (mkCommand goP "Go to a directory related to bookmark")
         <> command "list" (mkCommand listP "List all bookmarks")
     )
   where
@@ -41,11 +41,11 @@ renameP = CRename <$> keyP True <*> (Key <$> strArgument (metavar "NEW_KEY"))
 getP :: Parser (Command 'Get)
 getP = CGet <$> keyP True
 
-goP :: HomeDir -> Parser (Command 'Go)
-goP homeDir = mkCGo <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleterIO))
+goP :: Parser (Command 'Go)
+goP = mkCGo <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleterIO))
 
 mkCGo :: Text -> Command 'Go
-mkCGo str = CGo $ eitherToMaybe $ mkGoPath str
+mkCGo s = CGo $ eitherToMaybe $ mkGoPath s
 
 listP :: Parser (Command 'List)
 listP = pure CList

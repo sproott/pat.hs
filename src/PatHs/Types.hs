@@ -45,7 +45,7 @@ newtype Value = Value {unValue :: Text} deriving (Eq, Show)
 
 newtype ResolvedValue = ResolvedValue {unResolvedValue :: Text} deriving (Eq, Show)
 
-data GoPath = GoPath {key :: Key, path :: Maybe Text} deriving (Eq, Show)
+data GoPath = GoPath {gpKey :: Key, gpPath :: Maybe Text} deriving (Eq, Show)
 
 type Marks = Map ValidKey Value
 
