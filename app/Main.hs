@@ -11,7 +11,6 @@ import PatHs.Options
 import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
-import PatHs.Types.Env
 import Prettyprinter.Render.Terminal (putDoc)
 
 main :: IO ()

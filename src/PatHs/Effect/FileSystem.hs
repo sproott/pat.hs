@@ -12,7 +12,7 @@ data FileSystem :: Effect where
   ReadFile :: FilePath -> FileSystem m (Maybe Text)
   WriteFile :: FilePath -> Text -> FileSystem m ()
 
-type instance DispatchOf FileSystem = 'Dynamic
+type instance DispatchOf FileSystem = Dynamic
 
 createDirectoryIfMissing :: (FileSystem :> es) => Bool -> FilePath -> Eff es ()
 createDirectoryIfMissing parents = send . CreateDirectoryIfMissing parents
@@ -23,7 +23,7 @@ readFile = send . ReadFile
 writeFile :: (FileSystem :> es) => FilePath -> Text -> Eff es ()
 writeFile path = send . WriteFile path
 
-runFileSystemIO :: IOE :> es => Eff (FileSystem ': es) a -> Eff es a
+runFileSystemIO :: IOE :> es => Eff (FileSystem : es) a -> Eff es a
 runFileSystemIO = interpret $ \_ -> \case
   CreateDirectoryIfMissing parents dir -> liftIO $ IO.createDirectoryIfMissing parents dir
   ReadFile path -> liftIO $ safeIOMaybe $ T.pack <$> IO.readFile path

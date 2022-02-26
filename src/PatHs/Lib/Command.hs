@@ -13,7 +13,6 @@ import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
 import System.FilePath.Text ((</>))
-import qualified Data.Text as T
 
 type ExecCommand (c :: CommandType) a es = '[Error AppError, Reader Marks] :>> es => Command c -> Eff es a
 
@@ -25,7 +24,7 @@ execSave (CSave key) = do
   marks <- Reader.ask
   validKey <- validateKey' key
   case Map.lookup validKey marks of
-    Just val -> Error.throw $ AlreadyExists key val
+    Just val -> Error.throwError $ AlreadyExists key val
     Nothing -> do
       homeDir <- Reader.asks dirHome
       value <- unResolveToHomeDir homeDir . T.pack <$> Reader.asks dirCurrent
@@ -54,7 +53,7 @@ execGet (CGet key) = do
     Nothing -> Error.throwError $ NotExists key
     Just value -> pure value
 
-execGo :: Member (Reader Dirs) r => ExecCommand Go ResolvedValue r
+execGo :: Reader Dirs :> r => ExecCommand Go ResolvedValue r
 execGo (CGo maybeGoPath) = do
   homeDir <- Reader.asks dirHome
   goPath <- Error.note InvalidGoPath maybeGoPath
