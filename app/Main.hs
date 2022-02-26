@@ -1,6 +1,5 @@
 module Main where
 
-import qualified Data.Text as T
 import Options.Applicative (execParser)
 import qualified PatHs.Effect.FileSystem as FS
 import qualified PatHs.Effect.Output as Output
@@ -9,7 +8,6 @@ import PatHs.Options
 import PatHs.Prelude
 import PatHs.Render
 import PatHs.Types
-import PatHs.Types.Env
 import Polysemy (runM)
 import qualified Polysemy.Error as Error
 import qualified Polysemy.Reader as Reader
@@ -29,8 +27,7 @@ app :: IO (Either AppError ())
 app = do
   dirs <- dirsIO
   env <- envIO
-  let homeDir = dirHome dirs
-  (SomeCommand command) <- execParser (commandP $ unResolveToHomeDir homeDir (T.pack $ dirCurrent dirs))
+  (SomeCommand command) <- execParser commandP
   runPatHs command
     & runWithMarks
     & FS.runFileSystemIO

@@ -56,7 +56,7 @@ data CommandType = Save | Delete | Rename | Get | Go | List
 newtype HomeDir = HomeDir {unHomeDir :: Text} deriving (Eq, Show)
 
 data Command (c :: CommandType) where
-  CSave :: Key -> Value -> Command Save
+  CSave :: Key -> Command Save
   CDelete :: Key -> Command Delete
   CRename :: Key -> Key -> Command Rename
   CGet :: Key -> Command Get

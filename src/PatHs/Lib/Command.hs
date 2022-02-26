@@ -12,19 +12,23 @@ import qualified Polysemy.Error as Error
 import Polysemy.Reader (Reader)
 import qualified Polysemy.Reader as Reader
 import System.FilePath.Text ((</>))
+import qualified Data.Text as T
 
 type ExecCommand (c :: CommandType) a r = Members '[Error AppError, Reader Marks] r => Command c -> Sem r a
 
 validateKey' :: Member (Error AppError) r => Key -> Sem r ValidKey
 validateKey' = Error.fromEither . validateKey
 
-execSave :: ExecCommand Save Marks r
-execSave (CSave key value) = do
+execSave :: Member (Reader Dirs) r => ExecCommand Save Marks r
+execSave (CSave key) = do
   marks <- Reader.ask
   validKey <- validateKey' key
   case Map.lookup validKey marks of
     Just val -> Error.throw $ AlreadyExists key val
-    Nothing -> pure $ Map.insert validKey value marks
+    Nothing -> do
+      homeDir <- Reader.asks dirHome
+      value <- unResolveToHomeDir homeDir . T.pack <$> Reader.asks dirCurrent
+      pure $ Map.insert validKey value marks
 
 execDelete :: ExecCommand Delete Marks r
 execDelete (CDelete key) = do
