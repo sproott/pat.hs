@@ -168,6 +168,6 @@ equivalent = unorderedElemsAre . fmap eq
 assert :: a -> Predicate a -> Assertion
 assert x p = if accept p x then pure () else assertFailure $ explain p x
 
-runCompletePure :: (Text -> [Text]) -> Eff (Complete ': es) a -> Eff es a
+runCompletePure :: (Text -> [Text]) -> Eff (Complete : es) a -> Eff es a
 runCompletePure complete = interpret $ \_ -> \case
   Complete.CompleteDirectory str -> pure $ complete str

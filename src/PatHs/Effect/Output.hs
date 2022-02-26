@@ -11,7 +11,7 @@ import Prettyprinter.Render.Terminal (AnsiStyle, renderStrict)
 data Output o :: Effect where
   Output :: o -> Output o m ()
 
-type instance DispatchOf (Output o) = 'Dynamic
+type instance DispatchOf (Output o) = Dynamic
 
 output :: (HasCallStack, Output o :> es) => o -> Eff es ()
 output = send . Output
@@ -22,9 +22,9 @@ putAnsiDoc = output . renderStrict . layoutPretty defaultLayoutOptions
 putStrLn :: Output Text :> es => Text -> Eff es ()
 putStrLn = output . (<> "\n")
 
-runOutput :: (o -> Eff es ()) -> Eff (Output o ': es) a -> Eff es a
+runOutput :: (o -> Eff es ()) -> Eff (Output o : es) a -> Eff es a
 runOutput fn = interpret $ \_ -> \case
   Output o -> fn o
 
-runOutputIO :: IOE :> es => Eff (Output Text ': es) a -> Eff es a
+runOutputIO :: IOE :> es => Eff (Output Text : es) a -> Eff es a
 runOutputIO = runOutput (IO.putStr . T.unpack)

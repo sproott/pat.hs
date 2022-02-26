@@ -89,7 +89,7 @@ resolveMarks marks = do
   homeDir <- Reader.asks dirHome
   pure $ Map.map (resolveToHomeDir homeDir . unValue) marks
 
-runWithMarks :: '[Error AppError, FileSystem, Reader Dirs] :>> es => Eff (Reader Marks ': es) a -> Eff es a
+runWithMarks :: '[Error AppError, FileSystem, Reader Dirs] :>> es => Eff (Reader Marks : es) a -> Eff es a
 runWithMarks f = do
   marks <- loadMarks
   f & Reader.runReader marks
