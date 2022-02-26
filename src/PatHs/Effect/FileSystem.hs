@@ -15,7 +15,7 @@ data FileSystem m a where
 
 makeSem ''FileSystem
 
-runFileSystemIO :: Member (Embed IO) r => Sem (FileSystem ': r) a -> Sem r a
+runFileSystemIO :: Member (Embed IO) r => Sem (FileSystem : r) a -> Sem r a
 runFileSystemIO = interpret $ \case
   CreateDirectoryIfMissing parents dir -> embed $ IO.createDirectoryIfMissing parents dir
   ReadFile path -> embed $ safeIOMaybe $ T.pack <$> IO.readFile path

@@ -60,5 +60,5 @@ execGo (CGo maybeGoPath) = do
   value <- execGet (CGet $ gpKey goPath)
   pure $ resolveToHomeDir homeDir $ unValue value </> fromMaybe "" (gpPath goPath)
 
-execList :: Member (Reader Marks) r => Command 'List -> Sem r Marks
+execList :: Member (Reader Marks) r => Command List -> Sem r Marks
 execList CList = Reader.ask

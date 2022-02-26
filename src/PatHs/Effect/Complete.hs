@@ -13,6 +13,6 @@ data Complete m a where
 
 makeSem ''Complete
 
-runCompleteIO :: Member (Embed IO) r => Sem (Complete ': r) a -> Sem r a
+runCompleteIO :: Member (Embed IO) r => Sem (Complete : r) a -> Sem r a
 runCompleteIO = interpret $ \case
   CompleteDirectory directory -> embed $ fmap (fmap T.pack) $ runCompleter (bashCompleter "directory") $ T.unpack directory

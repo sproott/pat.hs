@@ -16,5 +16,5 @@ putAnsiDoc = Output.output . renderStrict . layoutPretty defaultLayoutOptions
 putStrLn :: Member (Output Text) r => Text -> Sem r ()
 putStrLn = Output.output . (<> "\n")
 
-runOutputIO :: Member (Embed IO) r => Sem (Output Text ': r) a -> Sem r a
+runOutputIO :: Member (Embed IO) r => Sem (Output Text : r) a -> Sem r a
 runOutputIO = runOutputSem (IO.putStr . T.unpack)

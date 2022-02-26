@@ -29,25 +29,25 @@ commandParser =
     mkCommand :: Parser (Command c) -> String -> ParserInfo SomeCommand
     mkCommand parser desc = info (SomeCommand <$> parser) $ progDesc desc
 
-saveP :: Parser (Command 'Save)
+saveP :: Parser (Command Save)
 saveP = CSave <$> keyP False
 
-deleteP :: Parser (Command 'Delete)
+deleteP :: Parser (Command Delete)
 deleteP = CDelete <$> keyP True
 
-renameP :: Parser (Command 'Rename)
+renameP :: Parser (Command Rename)
 renameP = CRename <$> keyP True <*> (Key <$> strArgument (metavar "NEW_KEY"))
 
-getP :: Parser (Command 'Get)
+getP :: Parser (Command Get)
 getP = CGet <$> keyP True
 
-goP :: Parser (Command 'Go)
+goP :: Parser (Command Go)
 goP = mkCGo <$> strArgument (metavar "GO_PATH" <> completer (mkCompleter' goPathCompleterIO))
 
-mkCGo :: Text -> Command 'Go
+mkCGo :: Text -> Command Go
 mkCGo s = CGo $ eitherToMaybe $ mkGoPath s
 
-listP :: Parser (Command 'List)
+listP :: Parser (Command List)
 listP = pure CList
 
 keyP :: Bool -> Parser Key
