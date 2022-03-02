@@ -41,9 +41,10 @@ packages:
 #
 extra-deps:
   - github: arybczak/effectful
-    commit: e9be11ec465be84100d04866427ebcec150f838b
+    commit: 907a4c10f135ea627c677e519eef922ccb1ddc8b
     subdirs:
       - effectful-core
+      - effectful-th
       - effectful
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module PatHs.Effect.FileSystem where
 
 import qualified Data.Text as T
@@ -6,6 +8,7 @@ import Effectful.Dispatch.Dynamic
 import PatHs.Prelude
 import qualified PatHs.Prelude as IO (readFile, writeFile)
 import qualified System.Directory as IO (createDirectoryIfMissing)
+import Effectful.TH
 
 data FileSystem :: Effect where
   CreateDirectoryIfMissing :: Bool -> FilePath -> FileSystem m ()
@@ -14,14 +17,7 @@ data FileSystem :: Effect where
 
 type instance DispatchOf FileSystem = Dynamic
 
-createDirectoryIfMissing :: (FileSystem :> es) => Bool -> FilePath -> Eff es ()
-createDirectoryIfMissing parents = send . CreateDirectoryIfMissing parents
-
-readFile :: (FileSystem :> es) => FilePath -> Eff es (Maybe Text)
-readFile = send . ReadFile
-
-writeFile :: (FileSystem :> es) => FilePath -> Text -> Eff es ()
-writeFile path = send . WriteFile path
+makeEffect ''FileSystem
 
 runFileSystemIO :: IOE :> es => Eff (FileSystem : es) a -> Eff es a
 runFileSystemIO = interpret $ \_ -> \case

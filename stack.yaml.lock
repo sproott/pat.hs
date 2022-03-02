@@ -5,31 +5,44 @@
 
 packages:
 - completed:
-    size: 52898
+    size: 65079
     subdir: effectful-core
-    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
     name: effectful-core
     version: '0.1'
-    sha256: 9e8e738b4070c63a1ab469b033f896c0722aa1b8c3b3f8a1824e81964c24fc19
+    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
     pantry-tree:
-      size: 1701
-      sha256: 79abd02230d3fcc243d7aac07c42958d3812380d231e9a08c0c72a4f44120180
+      size: 1804
+      sha256: d7952323d06384034eae9d559e4c80553463734b25d7a0966631d0e3477507ef
   original:
     subdir: effectful-core
-    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
 - completed:
-    size: 52898
+    size: 65079
+    subdir: effectful-th
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    name: effectful-th
+    version: '0.1'
+    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
+    pantry-tree:
+      size: 278
+      sha256: 8bc0d2e21149fb1d6ee0e7f938d7516b1a585e29b2d0207046d40edd4ee61795
+  original:
+    subdir: effectful-th
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+- completed:
+    size: 65079
     subdir: effectful
-    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
     name: effectful
     version: '0.1'
-    sha256: 9e8e738b4070c63a1ab469b033f896c0722aa1b8c3b3f8a1824e81964c24fc19
+    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
     pantry-tree:
-      size: 2232
-      sha256: 64694556ef4c57b709e57c9cef7254bc94aeab58d32b341b1a228f2587461c9e
+      size: 2388
+      sha256: 150eb97ad1ee717fb68ccddc46925dfe67aa97aa099542ea1bd3c2daed85377c
   original:
     subdir: effectful
-    url: https://github.com/arybczak/effectful/archive/e9be11ec465be84100d04866427ebcec150f838b.tar.gz
+    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
 snapshots:
 - completed:
     size: 619163

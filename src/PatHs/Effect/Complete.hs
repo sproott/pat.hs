@@ -8,14 +8,14 @@ import Effectful.Dispatch.Dynamic
 import Options.Applicative (bashCompleter)
 import Options.Applicative.Types (runCompleter)
 import PatHs.Prelude
+import Effectful.TH
 
 data Complete :: Effect where
   CompleteDirectory :: Text -> Complete m [Text]
 
 type instance DispatchOf Complete = Dynamic
 
-completeDirectory :: Complete :> es => Text -> Eff es [Text]
-completeDirectory = send . CompleteDirectory
+makeEffect ''Complete
 
 runCompleteIO :: IOE :> es => Eff (Complete : es) a -> Eff es a
 runCompleteIO = interpret $ \_ -> \case
