@@ -24,6 +24,7 @@ dependencies:
   - containers
   - directory
   - effectful
+  - effectful-th
   - either
   - extra
   - filepath
@@ -46,6 +47,7 @@ default-extensions:
   - NoImplicitPrelude
   - OverloadedStrings
   - RankNTypes
+  - ScopedTypeVariables
   - TypeApplications
   - TypeFamilies
   - TypeOperators

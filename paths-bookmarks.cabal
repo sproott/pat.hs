@@ -54,6 +54,7 @@ library
       NoImplicitPrelude
       OverloadedStrings
       RankNTypes
+      ScopedTypeVariables
       TypeApplications
       TypeFamilies
       TypeOperators
@@ -63,6 +64,7 @@ library
     , containers
     , directory
     , effectful
+    , effectful-th
     , either
     , extra
     , filepath
@@ -92,6 +94,7 @@ executable paths
       NoImplicitPrelude
       OverloadedStrings
       RankNTypes
+      ScopedTypeVariables
       TypeApplications
       TypeFamilies
       TypeOperators
@@ -101,6 +104,7 @@ executable paths
     , containers
     , directory
     , effectful
+    , effectful-th
     , either
     , extra
     , filepath
@@ -132,6 +136,7 @@ test-suite paths-test
       NoImplicitPrelude
       OverloadedStrings
       RankNTypes
+      ScopedTypeVariables
       TypeApplications
       TypeFamilies
       TypeOperators
@@ -141,6 +146,7 @@ test-suite paths-test
     , containers
     , directory
     , effectful
+    , effectful-th
     , either
     , explainable-predicates
     , extra

@@ -1,8 +1,11 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module PatHs.Effect.Output (Output, output, putAnsiDoc, putStrLn, runOutputIO) where
 
 import qualified Data.Text as T
 import Effectful
 import Effectful.Dispatch.Dynamic
+import Effectful.TH
 import PatHs.Prelude hiding (putStr, putStrLn)
 import qualified PatHs.Prelude as IO (putStr)
 import Prettyprinter (Doc, defaultLayoutOptions, layoutPretty)
@@ -13,8 +16,7 @@ data Output o :: Effect where
 
 type instance DispatchOf (Output o) = Dynamic
 
-output :: (HasCallStack, Output o :> es) => o -> Eff es ()
-output = send . Output
+makeEffect ''Output
 
 putAnsiDoc :: Output Text :> es => Doc AnsiStyle -> Eff es ()
 putAnsiDoc = output . renderStrict . layoutPretty defaultLayoutOptions

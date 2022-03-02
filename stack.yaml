@@ -43,9 +43,10 @@ packages:
 extra-deps:
   - explainable-predicates-0.1.2.0@sha256:f50494313c1a303271fff01c3e858b7ac364521abb879898b36a10e3b7b678ab,3749
   - github: arybczak/effectful
-    commit: da73cb6e548f682750aba62ec830792f1b9d8235
+    commit: 907a4c10f135ea627c677e519eef922ccb1ddc8b
     subdirs:
       - effectful-core
+      - effectful-th
       - effectful
 # Override default flag values for local packages and extra-deps
 # flags: {}
