@@ -7,7 +7,7 @@ packages:
 - completed:
     size: 65079
     subdir: effectful-core
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
     name: effectful-core
     version: '0.1'
     sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
@@ -16,11 +16,11 @@ packages:
       sha256: d7952323d06384034eae9d559e4c80553463734b25d7a0966631d0e3477507ef
   original:
     subdir: effectful-core
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
 - completed:
     size: 65079
     subdir: effectful-th
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
     name: effectful-th
     version: '0.1'
     sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
@@ -29,11 +29,11 @@ packages:
       sha256: 8bc0d2e21149fb1d6ee0e7f938d7516b1a585e29b2d0207046d40edd4ee61795
   original:
     subdir: effectful-th
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
 - completed:
     size: 65079
     subdir: effectful
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
     name: effectful
     version: '0.1'
     sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
@@ -42,7 +42,7 @@ packages:
       sha256: 150eb97ad1ee717fb68ccddc46925dfe67aa97aa099542ea1bd3c2daed85377c
   original:
     subdir: effectful
-    url: https://github.com/arybczak/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
 snapshots:
 - completed:
     size: 619163
