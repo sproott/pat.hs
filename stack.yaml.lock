@@ -5,44 +5,26 @@
 
 packages:
 - completed:
-    size: 65079
-    subdir: effectful-core
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
-    name: effectful-core
-    version: '0.1'
-    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
+    hackage: effectful-1.2.0.0@sha256:3ddb4dcda2f61a70cb5101fb0e99005cd8f7ae2b0c0f56943de98fc350814b41,6072
     pantry-tree:
-      size: 1804
-      sha256: d7952323d06384034eae9d559e4c80553463734b25d7a0966631d0e3477507ef
+      size: 2491
+      sha256: cc9431d202e6acf722eb4de9ae485c86c4818d44852f1aa27951e534955ae767
   original:
-    subdir: effectful-core
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    hackage: effectful-1.2.0.0@sha256:3ddb4dcda2f61a70cb5101fb0e99005cd8f7ae2b0c0f56943de98fc350814b41,6072
 - completed:
-    size: 65079
-    subdir: effectful-th
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
-    name: effectful-th
-    version: '0.1'
-    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
+    hackage: effectful-core-1.2.0.0@sha256:1b12033c3b879b78e0617364bbb0c61b8ac943cc156d506c4f5b5ae03adc5202,3622
     pantry-tree:
-      size: 278
-      sha256: 8bc0d2e21149fb1d6ee0e7f938d7516b1a585e29b2d0207046d40edd4ee61795
+      size: 1855
+      sha256: c73f3ff8997a5567f07eafb19ea486c202063242931bd68707954ffe65e25540
   original:
-    subdir: effectful-th
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    hackage: effectful-core-1.2.0.0@sha256:1b12033c3b879b78e0617364bbb0c61b8ac943cc156d506c4f5b5ae03adc5202,3622
 - completed:
-    size: 65079
-    subdir: effectful
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
-    name: effectful
-    version: '0.1'
-    sha256: 288627ae163dbfa8ac37dea7a32614031e15ed7cc681060207af7fb98451e331
+    hackage: effectful-th-1.0.0.0@sha256:34437a052d2af2f025e78730dc025e194560defb08337e262cdb00dc7888a66c,2520
     pantry-tree:
-      size: 2388
-      sha256: 150eb97ad1ee717fb68ccddc46925dfe67aa97aa099542ea1bd3c2daed85377c
+      size: 327
+      sha256: 775b329a41d886f1ca6d3d2ff59154dffdd3a71a8333eb14577e998c6f75c019
   original:
-    subdir: effectful
-    url: https://github.com/haskell-effectful/effectful/archive/907a4c10f135ea627c677e519eef922ccb1ddc8b.tar.gz
+    hackage: effectful-th-1.0.0.0@sha256:34437a052d2af2f025e78730dc025e194560defb08337e262cdb00dc7888a66c,2520
 snapshots:
 - completed:
     size: 619163

@@ -40,12 +40,9 @@ packages:
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
 extra-deps:
-  - github: haskell-effectful/effectful
-    commit: 907a4c10f135ea627c677e519eef922ccb1ddc8b
-    subdirs:
-      - effectful-core
-      - effectful-th
-      - effectful
+  - effectful-1.2.0.0@sha256:3ddb4dcda2f61a70cb5101fb0e99005cd8f7ae2b0c0f56943de98fc350814b41,6072
+  - effectful-core-1.2.0.0@sha256:1b12033c3b879b78e0617364bbb0c61b8ac943cc156d506c4f5b5ae03adc5202,3622
+  - effectful-th-1.0.0.0@sha256:34437a052d2af2f025e78730dc025e194560defb08337e262cdb00dc7888a66c,2520
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
