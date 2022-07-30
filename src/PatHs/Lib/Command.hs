@@ -20,12 +20,12 @@ validateKey' :: Member (Error AppError) r => Key -> Sem r ValidKey
 validateKey' = Error.fromEither . validateKey
 
 execSave :: Member (Reader Dirs) r => ExecCommand Save Marks r
-execSave (CSave key) = do
+execSave (CSave key forceOverwrite) = do
   marks <- Reader.ask
   validKey <- validateKey' key
-  case Map.lookup validKey marks of
-    Just val -> Error.throw $ AlreadyExists key val
-    Nothing -> do
+  case (Map.lookup validKey marks, forceOverwrite) of
+    (Just val, False) -> Error.throw $ AlreadyExists key val
+    _ -> do
       homeDir <- Reader.asks dirHome
       value <- unResolveToHomeDir homeDir . T.pack <$> Reader.asks dirCurrent
       pure $ Map.insert validKey value marks

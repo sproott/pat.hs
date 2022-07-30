@@ -30,7 +30,10 @@ commandParser =
     mkCommand parser desc = info (SomeCommand <$> parser) $ progDesc desc
 
 saveP :: Parser (Command Save)
-saveP = CSave <$> keyP False
+saveP = CSave <$> keyP False <*> switch (
+  long "force" 
+  <> short 'f' 
+  <> help "Overwrite existing bookmark" )
 
 deleteP :: Parser (Command Delete)
 deleteP = CDelete <$> keyP True
