@@ -2,17 +2,17 @@ module PatHs.Config where
 
 import Control.Arrow ((***))
 import qualified Data.Map.Strict as Map
+import Effectful
+import Effectful.Reader.Static (Reader)
+import qualified Effectful.Reader.Static as Reader
 import PatHs.Parser
 import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
-import Polysemy (Member, Sem)
-import Polysemy.Reader (Reader)
-import qualified Polysemy.Reader as Reader
 
 type Config = [(Key, Value)]
 
-configParser :: Member (Reader Dirs) r => Sem r (Parser Config)
+configParser :: Reader Dirs :> es => Eff es (Parser Config)
 configParser = do
   homeDir <- Reader.asks dirHome
   pure $ fmap (Key *** unResolveToHomeDir homeDir) <$> file
