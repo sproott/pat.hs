@@ -9,7 +9,7 @@ import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
 import qualified PatHs.Effect.Error as Error
 import PatHs.Options.Complete (goPathCompleter, keyCompleter)
-import PatHs.Prelude hiding (Predicate, just, left, right)
+import PatHs.Prelude hiding (Predicate)
 import PatHs.Types
 import PatHs.Types.Env
 import Test.Predicates
@@ -28,123 +28,112 @@ import Test.Tasty.HUnit
   )
 
 main :: IO ()
-main = defaultMain suite
+main = do
+  !marks <- verifyMarks marksData
+  defaultMain (suite marks)
 
-suite :: TestTree
-suite =
-  testGroup "Tests" [testComplete]
+suite :: Marks -> TestTree
+suite marks =
+  testGroup "Tests" [testComplete marks]
 
-testComplete :: TestTree
-testComplete =
+testComplete :: Marks -> TestTree
+testComplete marks =
   testGroup
     "PatHs.Options.Complete"
+    $ fmap ($ marks) $
     [ testKeyCompleter,
       testGoPathCompleter
     ]
 
-testKeyCompleter :: TestTree
-testKeyCompleter =
+testKeyCompleter :: Marks -> TestTree
+testKeyCompleter marks =
   testGroup
     "keyCompleter"
-    [ testCase "No match" $ do
-        marks <- verifyMarks marks
+    [ testCase "No match" $
         assert
           (keyCompleter' "c" marks)
           isEmpty,
-      testCase "Single match" $ do
-        marks <- verifyMarks marks
+      testCase "Single match" $
         assert
           (keyCompleter' "r" marks)
           (eq ["root"]),
-      testCase "Single exact match" $ do
-        marks <- verifyMarks marks
+      testCase "Single exact match" $
         assert
           (keyCompleter' "root" marks)
           (eq ["root"]),
-      testCase "Multiple matches" $ do
-        marks <- verifyMarks marks
+      testCase "Multiple matches" $
         assert
           (keyCompleter' "h" marks)
           (equivalent ["home", "home2"]),
-      testCase "Multiple matches with one exact match" $ do
-        marks <- verifyMarks marks
+      testCase "Multiple matches with one exact match" $
         assert
           (keyCompleter' "home" marks)
           (equivalent ["home", "home2"])
     ]
   where
     keyCompleter' :: Text -> Marks -> [Text]
-    keyCompleter' str marks = keyCompleter str & Reader.runReader dirs & Reader.runReader marks & runPureEff
+    keyCompleter' str mockMarks = keyCompleter str & Reader.runReader dirs & Reader.runReader mockMarks & runPureEff
 
-testGoPathCompleter :: TestTree
-testGoPathCompleter =
+testGoPathCompleter :: Marks -> TestTree
+testGoPathCompleter marks =
   testGroup
     "goPathCompleter"
-    [ testCase "No match" $ do
-        marks <- verifyMarks marks
+    [ testCase "No match" $
         assert
           (goPathCompleter' "config" marks (const []))
           (right isEmpty),
-      testCase "Empty returns all marks" $ do
-        marks <- verifyMarks marks
+      testCase "Empty returns all marks" $
         assert
           (goPathCompleter' "" marks (const []))
           (right (equivalent ["home/", "home2/", "root/", "lbin/"])),
-      testCase "Multiple matching marks" $ do
-        marks <- verifyMarks marks
+      testCase "Multiple matching marks" $
         assert
           (goPathCompleter' "h" marks (const []))
           (right (equivalent ["home/", "home2/"])),
-      testCase "Multiple matching marks with one exact match" $ do
-        marks <- verifyMarks marks
+      testCase "Multiple matching marks with one exact match" $
         assert
           (goPathCompleter' "home" marks (const []))
           (right (equivalent ["home/", "home2/"])),
-      testCase "One matching mark completes" $ do
-        marks <- verifyMarks marks
+      testCase "One matching mark completes" $
         let complete "/home/user" = ["/home/user/.config", "/home/user/.local"]
             complete _ = []
-        assert
+        in assert
           (goPathCompleter' "home/" marks complete)
           (right (equivalent ["home/.config/", "home/.local/"])),
-      testCase "One matching directory cascades" $ do
-        marks <- verifyMarks marks
+      testCase "One matching directory cascades" $
         let complete "/home/user" = ["/home/user/.config"]
             complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
-        assert
+        in assert
           (goPathCompleter' "home/" marks complete)
           (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
-      testCase "Multiple matching directories complete" $ do
-        marks <- verifyMarks marks
+      testCase "Multiple matching directories complete" $
         let complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
-        assert
+        in assert
           (goPathCompleter' "home/.config/" marks complete)
           (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
-      testCase "GoPath = \"/\" fails" $ do
-        marks <- verifyMarks marks
+      testCase "GoPath = \"/\" fails" $
         assert
           (goPathCompleter' "/" marks (const []))
           (left $ eq InvalidGoPath),
-      testCase "GoPath starting with '/' fails" $ do
-        marks <- verifyMarks marks
+      testCase "GoPath starting with '/' fails" $
         assert
           (goPathCompleter' "/.config" marks (const []))
           (left $ eq InvalidGoPath)
     ]
   where
     goPathCompleter' :: Text -> Marks -> (Text -> [Text]) -> Either AppError [Text]
-    goPathCompleter' str marks complete =
+    goPathCompleter' str mockMarks complete =
       goPathCompleter str
         & Reader.runReader dirs
-        & Reader.runReader marks
+        & Reader.runReader mockMarks
         & runCompletePure complete
         & Error.runErrorNoCallStack
         & runPureEff
 
-marks :: [(Text, Text)]
-marks = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
+marksData :: [(Text, Text)]
+marksData = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
 
 dirs :: Dirs
 dirs = Dirs {dirConfig = "/home/user/.local/share/paths", dirCurrent = "/home/user", dirHome = homeDir}
@@ -156,7 +145,7 @@ verifyMarks :: [(Text, Text)] -> IO Marks
 verifyMarks list = do
   let marks = mkMarks list
   case marks of
-    Just marks -> pure marks
+    Just m -> pure m
     Nothing -> assertFailure "Failed to verify marks"
 
 mkMarks :: [(Text, Text)] -> Maybe Marks
