@@ -19,7 +19,7 @@ commandParser :: Parser SomeCommand
 commandParser =
   subparser
     ( command "save" (mkCommand saveP "Save bookmark")
-        <> command "delete" (mkCommand deleteP "Delete bookmark")
+        <> command "delete" (mkCommand deleteP "Delete one or more bookmarks")
         <> command "rename" (mkCommand renameP "Rename bookmark")
         <> command "get" (mkCommand getP "Get bookmark")
         <> command "go" (mkCommand goP "Go to a directory related to bookmark")
@@ -36,7 +36,7 @@ saveP = CSave <$> keyP False <*> switch (
   <> help "Overwrite existing bookmark" )
 
 deleteP :: Parser (Command Delete)
-deleteP = CDelete <$> keyP True
+deleteP = CDelete <$> some (keyP' True Plural)
 
 renameP :: Parser (Command Rename)
 renameP = CRename <$> keyP True <*> (Key <$> strArgument (metavar "NEW_KEY"))
@@ -53,5 +53,13 @@ mkCGo s = CGo $ eitherToMaybe $ mkGoPath s
 listP :: Parser (Command List)
 listP = pure CList
 
+data Plurality = Plural | Singular
+
+keyP' :: Bool -> Plurality -> Parser Key
+keyP' addCompleter plurality = Key <$> strArgument (metavar name <> if addCompleter then completer (mkCompleter' keyCompleter) else mempty) where
+  name = case plurality of
+    Plural -> "KEYS..."
+    Singular -> "KEY"
+
 keyP :: Bool -> Parser Key
-keyP addCompleter = Key <$> strArgument (metavar "KEY" <> if addCompleter then completer (mkCompleter' keyCompleter) else mempty)
+keyP = flip keyP' Singular

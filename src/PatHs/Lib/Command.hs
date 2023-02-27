@@ -31,11 +31,12 @@ execSave (CSave key forceOverwrite) = do
       pure $ Map.insert validKey value marks
 
 execDelete :: ExecCommand Delete Marks es
-execDelete (CDelete key) = do
+execDelete (CDelete keys) = do
   marks <- Reader.ask
-  _ <- execGet (CGet key)
-  validKey <- validateKey' key
-  pure $ Map.delete validKey marks
+  validKeys <- forM keys $ \key -> do
+    _ <- execGet (CGet key)
+    validateKey' key
+  pure $ foldr Map.delete marks validKeys
 
 execRename :: ExecCommand Rename Marks es
 execRename (CRename key newKey) = do
