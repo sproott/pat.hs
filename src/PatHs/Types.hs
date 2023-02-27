@@ -20,8 +20,6 @@ module PatHs.Types
     resolveToHomeDir,
     unResolveToHomeDir,
     mkGoPath,
-    AppM,
-    runApp,
   )
 where
 
@@ -31,11 +29,6 @@ import PatHs.Parser
 import PatHs.Prelude
 import System.Directory (getHomeDirectory)
 import Text.Megaparsec (MonadParsec (eof))
-
-type AppM a = ExceptT AppError IO a
-
-runApp :: AppM a -> IO (Either AppError a)
-runApp = runExceptT
 
 newtype Key = Key {unKey :: Text} deriving (Eq, Ord, Show)
 
