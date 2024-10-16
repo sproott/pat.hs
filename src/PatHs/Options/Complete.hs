@@ -49,18 +49,18 @@ runCompleterIO completer str = do
       & runEff
   pure $ fromRight [] completions
 
-keyCompleter :: Reader Marks :> es => MyCompleter es
+keyCompleter :: (Reader Marks :> es) => MyCompleter es
 keyCompleter str = do
   marks <- execList CList
   pure $ filter (T.isPrefixOf str) $ unValidKey <$> Map.keys marks
 
-goPathCompleterIO :: '[IOE, Reader Marks] :>> es => MyCompleter es
+goPathCompleterIO :: ('[IOE, Reader Marks] :>> es) => MyCompleter es
 goPathCompleterIO str = do
   dirs <- liftIO dirsIO
   completions <- goPathCompleter str & Complete.runCompleteIO & Reader.runReader dirs & Error.runErrorNoCallStack @AppError
   pure $ fromRight [] completions
 
-goPathCompleter :: '[Complete, Error AppError, Reader Dirs, Reader Marks] :>> es => MyCompleter es
+goPathCompleter :: ('[Complete, Error AppError, Reader Dirs, Reader Marks] :>> es) => MyCompleter es
 goPathCompleter str =
   if T.null str
     then do
@@ -79,20 +79,20 @@ goPathCompleter str =
     completeMarks matchingMarks = addTrailingPathSeparator . unValidKey . fst <$> matchingMarks
     filterMarks fn = filter (fn . unValidKey . fst) . Map.toList
 
-completeSingleMark :: '[Complete, Reader Dirs] :>> es => (ValidKey, Value) -> GoPath -> Eff es [Text]
+completeSingleMark :: ('[Complete, Reader Dirs] :>> es) => (ValidKey, Value) -> GoPath -> Eff es [Text]
 completeSingleMark mark goPath = do
   let key = unValidKey $ fst mark
   homeDir <- Reader.asks dirHome
 
   let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
-  let fullPath = case gpPath goPath of
-        Just goPathStr -> value </> goPathStr
-        Nothing -> value
 
-  dirs <- Complete.completeDirectory fullPath
-  fmap (replacePrefix value key . addTrailingPathSeparator) <$> case dirs of
+  let path = addTrailingPathSeparator $ (value </>) $ fromMaybe "" $ gpPath goPath
+  directChildDirs <- Complete.completeDirectory path
+
+  dirs <- case directChildDirs of
     [dir] -> do
-      newCompletions <-
-        Complete.completeDirectory $ addTrailingPathSeparator $ value </> dir
+      newCompletions <- Complete.completeDirectory $ addTrailingPathSeparator dir
       pure $ dir : newCompletions
-    _ -> pure dirs
+    _ -> pure directChildDirs
+
+  pure (replacePrefix value key . addTrailingPathSeparator <$> dirs)
