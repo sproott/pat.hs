@@ -9,6 +9,6 @@ data Dirs = Dirs
     dirCurrent :: FilePath
   }
 
-data Env = Env
+newtype Env = Env
   { envIsStdoutInteractive :: Bool
   }

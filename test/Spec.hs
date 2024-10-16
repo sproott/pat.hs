@@ -40,10 +40,11 @@ testComplete :: Marks -> TestTree
 testComplete marks =
   testGroup
     "PatHs.Options.Complete"
-    $ fmap ($ marks) $
-    [ testKeyCompleter,
-      testGoPathCompleter
-    ]
+    $ fmap
+      ($ marks)
+      [ testKeyCompleter,
+        testGoPathCompleter
+      ]
 
 testKeyCompleter :: Marks -> TestTree
 testKeyCompleter marks =
@@ -85,7 +86,7 @@ testGoPathCompleter marks =
       testCase "Empty returns all marks" $
         assert
           (goPathCompleter' "" marks (const []))
-          (right (equivalent ["home/", "home2/", "root/", "lbin/"])),
+          (right (equivalent ["home/", "home2/", "root/", "lbin/", "macos/"])),
       testCase "Multiple matching marks" $
         assert
           (goPathCompleter' "h" marks (const []))
@@ -95,24 +96,24 @@ testGoPathCompleter marks =
           (goPathCompleter' "home" marks (const []))
           (right (equivalent ["home/", "home2/"])),
       testCase "One matching mark completes" $
-        let complete "/home/user" = ["/home/user/.config", "/home/user/.local"]
+        let complete "/home/user/" = ["/home/user/.config", "/home/user/.local"]
             complete _ = []
-        in assert
-          (goPathCompleter' "home/" marks complete)
-          (right (equivalent ["home/.config/", "home/.local/"])),
+         in assert
+              (goPathCompleter' "home/" marks complete)
+              (right (equivalent ["home/.config/", "home/.local/"])),
       testCase "One matching directory cascades" $
-        let complete "/home/user" = ["/home/user/.config"]
-            complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
+        let complete "/home/user/" = ["/home/user/.config"]
+            complete "/home/user/.config/" = ["/home/user/.config/awesome/", "/home/user/.config/nvim/"]
             complete _ = []
-        in assert
-          (goPathCompleter' "home/" marks complete)
-          (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
+         in assert
+              (goPathCompleter' "home/" marks complete)
+              (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
       testCase "Multiple matching directories complete" $
         let complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
-        in assert
-          (goPathCompleter' "home/.config/" marks complete)
-          (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
+         in assert
+              (goPathCompleter' "home/.config/" marks complete)
+              (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
       testCase "GoPath = \"/\" fails" $
         assert
           (goPathCompleter' "/" marks (const []))
@@ -133,7 +134,7 @@ testGoPathCompleter marks =
         & runPureEff
 
 marksData :: [(Text, Text)]
-marksData = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin")]
+marksData = [("home", "/home/user"), ("home2", "/home/user2"), ("root", "/root"), ("lbin", "/home/user/.local/bin"), ("macos", "/home/user/macOS")]
 
 dirs :: Dirs
 dirs = Dirs {dirConfig = "/home/user/.local/share/paths", dirCurrent = "/home/user", dirHome = homeDir}
