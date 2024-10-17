@@ -109,10 +109,10 @@ testGoPathCompleter marks =
               (goPathCompleter' "home/" marks complete)
               (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
       testCase "Multiple matching directories complete" $
-        let complete "/home/user/.config/" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
+        let complete "/home/user/.conf" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
          in assert
-              (goPathCompleter' "home/.config/" marks complete)
+              (goPathCompleter' "home/.conf" marks complete)
               (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
       testCase "GoPath = \"/\" fails" $
         assert
