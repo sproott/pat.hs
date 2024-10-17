@@ -86,7 +86,7 @@ completeSingleMark mark goPath = do
 
   let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark))
 
-  let path = traceShowId $ (addTrailingPathSeparator value </>) $ fromMaybe "" $ gpPath goPath
+  let path = (addTrailingPathSeparator value </>) $ fromMaybe "" $ gpPath goPath
   directChildDirs <- Complete.completeDirectory path
 
   dirs <- case directChildDirs of
