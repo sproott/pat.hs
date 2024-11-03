@@ -83,6 +83,10 @@ testGoPathCompleter marks =
         assert
           (goPathCompleter' "config" marks (const []))
           (right isEmpty),
+      testCase "Matching mark but directory does not exist" $
+        assert
+          (goPathCompleter' "root" marks (const []))
+          (right (equivalent ["root/"])),
       testCase "Empty returns all marks" $
         assert
           (goPathCompleter' "" marks (const []))
