@@ -71,8 +71,8 @@ goPathCompleter str =
       marks <- execList CList
       let goPath = GoPath (Key keyStr) goPathStr
       let matchingMarks = filterMarks (T.isPrefixOf keyStr) marks
-      let exactMatch = viaNonEmpty head matchingMarks <|> listToMaybe (filterMarks (== keyStr) marks)
-      case (length matchingMarks == 1 || isJust (gpPath goPath), exactMatch) of
+      let exactMatch = viaNonEmpty head matchingMarks
+      case (length matchingMarks == 1 || isJust (gpPath goPath), exactMatch) of -- either there is only one mark with the given prefix, or the user has written "/" after the mark
         (True, Just mark) -> completeSingleMark mark goPath
         _ -> pure $ completeMarks matchingMarks
   where
@@ -90,10 +90,11 @@ completeSingleMark mark goPath = do
   directChildDirs <- Complete.completeDirectory path -- the direct child directories of the path
 
   dirs <- case directChildDirs of
-    [dir] -> do -- if there is only one direct child directory, complete it
-      newCompletions <- Complete.completeDirectory $ addTrailingPathSeparator dir
-      pure $ dir : newCompletions
+    [dir] -> -- if there is only one direct child directory
+      do 
+        newCompletions <- Complete.completeDirectory $ addTrailingPathSeparator dir
+        pure $ (if isJust (gpPath goPath) then id else (value : )) $ dir : newCompletions
     [] -> pure [value] -- if the directory does not exist or has no direct child directories, complete the directory itself
     _ -> pure directChildDirs
-
-  pure (replacePrefix value key . addTrailingPathSeparator <$> dirs)
+  
+  pure $ (replacePrefix value key . addTrailingPathSeparator <$> dirs)
