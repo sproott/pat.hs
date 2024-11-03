@@ -14,7 +14,7 @@ import PatHs.Types
 import PatHs.Types.Env
 import System.FilePath.Text ((</>))
 
-type ExecCommand (c :: CommandType) a es = '[Error AppError, Reader Marks] :>> es => Command c -> Eff es a
+type ExecCommand (c :: CommandType) a es = (Error AppError :> es, Reader Marks :> es) => Command c -> Eff es a
 
 validateKey' :: Error AppError :> es => Key -> Eff es ValidKey
 validateKey' = Error.fromEither . validateKey

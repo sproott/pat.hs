@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-19.16
+resolver: lts-22.40
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,10 +39,10 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-extra-deps:
-  - effectful-1.2.0.0@sha256:3ddb4dcda2f61a70cb5101fb0e99005cd8f7ae2b0c0f56943de98fc350814b41,6072
-  - effectful-core-1.2.0.0@sha256:1b12033c3b879b78e0617364bbb0c61b8ac943cc156d506c4f5b5ae03adc5202,3622
-  - effectful-th-1.0.0.0@sha256:34437a052d2af2f025e78730dc025e194560defb08337e262cdb00dc7888a66c,2520
+# extra-deps:
+#   - effectful-1.2.0.0@sha256:3ddb4dcda2f61a70cb5101fb0e99005cd8f7ae2b0c0f56943de98fc350814b41,6072
+#   - effectful-core-1.2.0.0@sha256:1b12033c3b879b78e0617364bbb0c61b8ac943cc156d506c4f5b5ae03adc5202,3622
+#   - effectful-th-1.0.0.0@sha256:34437a052d2af2f025e78730dc025e194560defb08337e262cdb00dc7888a66c,2520
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
@@ -67,8 +67,8 @@ extra-deps:
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
 
-setup-info:
-  ghc:
-    linux64-tinfo6:
-      9.0.2:
-        url: "https://downloads.haskell.org/ghc/9.0.2/ghc-9.0.2a-x86_64-fedora27-linux.tar.xz"
+# setup-info:
+#   ghc:
+#     linux64-tinfo6:
+#       9.0.2:
+#         url: "https://downloads.haskell.org/ghc/9.0.2/ghc-9.0.2a-x86_64-fedora27-linux.tar.xz"
