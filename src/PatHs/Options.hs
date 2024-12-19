@@ -19,7 +19,7 @@ commandParser :: Parser SomeCommand
 commandParser =
   subparser
     ( command "save" (mkCommand saveP "Save bookmark")
-        <> command "delete" (mkCommand deleteP "Delete one or more bookmarks")
+        <> command "remove" (mkCommand removeP "Remove one or more bookmarks")
         <> command "rename" (mkCommand renameP "Rename bookmark")
         <> command "get" (mkCommand getP "Get bookmark")
         <> command "go" (mkCommand goP "Go to a directory related to bookmark")
@@ -35,8 +35,8 @@ saveP = CSave <$> keyP False <*> switch (
   <> short 'f' 
   <> help "Overwrite existing bookmark" )
 
-deleteP :: Parser (Command Delete)
-deleteP = CDelete <$> some (keyP' True Plural)
+removeP :: Parser (Command Remove)
+removeP = CRemove <$> some (keyP' True Plural)
 
 renameP :: Parser (Command Rename)
 renameP = CRename <$> keyP True <*> (Key <$> strArgument (metavar "NEW_KEY"))

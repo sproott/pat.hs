@@ -44,13 +44,13 @@ type Marks = Map ValidKey Value
 
 type ResolvedMarks = Map ValidKey ResolvedValue
 
-data CommandType = Save | Delete | Rename | Get | Go | List
+data CommandType = Save | Remove | Rename | Get | Go | List
 
 newtype HomeDir = HomeDir {unHomeDir :: Text} deriving (Eq, Show)
 
 data Command (c :: CommandType) where
   CSave :: Key -> Bool -> Command Save
-  CDelete :: [Key] -> Command Delete
+  CRemove :: [Key] -> Command Remove
   CRename :: Key -> Key -> Command Rename
   CGet :: Key -> Command Get
   CGo :: Maybe GoPath -> Command Go

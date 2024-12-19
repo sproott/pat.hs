@@ -58,7 +58,7 @@ convertKeys f = traverse $ bitraverse f pure
 
 runPatHs :: (Error AppError :> es, FileSystem :> es, Output Text :> es, Reader Dirs :> es, Reader Env :> es, Reader Marks :> es) => Command c -> Eff es ()
 runPatHs command@CSave {} = execSave command >>= saveAndPrintMarks
-runPatHs command@CDelete {} = execDelete command >>= saveAndPrintMarks
+runPatHs command@CRemove {} = execRemove command >>= saveAndPrintMarks
 runPatHs command@CRename {} = execRename command >>= saveAndPrintMarks
 runPatHs command@CGet {} = do
   value <- execGet command

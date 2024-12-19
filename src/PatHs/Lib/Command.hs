@@ -30,8 +30,8 @@ execSave (CSave key forceOverwrite) = do
       value <- unResolveToHomeDir homeDir . T.pack <$> Reader.asks dirCurrent
       pure $ Map.insert validKey value marks
 
-execDelete :: ExecCommand Delete Marks es
-execDelete (CDelete keys) = do
+execRemove :: ExecCommand Remove Marks es
+execRemove (CRemove keys) = do
   marks <- Reader.ask
   validKeys <- forM keys $ \key -> do
     _ <- execGet (CGet key)

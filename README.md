@@ -16,9 +16,9 @@ CLI utility for saving often used directories under a short name
 
 - Prints the path associated with the given `KEY`
 
-`paths delete KEY`
+`paths remove KEY`
 
-- Deletes the `KEY` and its associated value from the [bookmarks file](#-bookmarks-file)
+- Removes the `KEY` and its associated value from the [bookmarks file](#-bookmarks-file)
 
 `paths rename KEY NEW_KEY`
 
