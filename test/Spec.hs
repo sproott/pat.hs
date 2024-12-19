@@ -87,6 +87,10 @@ testGoPathCompleter marks =
         assert
           (goPathCompleter' "root" marks (const []))
           (right (equivalent ["root/"])),
+      testCase "Matching mark with trailing slash but directory does not exist" $
+        assert
+          (goPathCompleter' "root/" marks (const []))
+          (right isEmpty),
       testCase "Empty returns all marks" $
         assert
           (goPathCompleter' "" marks (const []))
@@ -105,6 +109,10 @@ testGoPathCompleter marks =
          in assert
               (goPathCompleter' "home/" marks complete)
               (right (equivalent ["home/.config/", "home/.local/"])),
+      testCase "No matching directory" $
+        assert
+          (goPathCompleter' "root/A" marks (const []))
+          (right isEmpty),
       testCase "One matching directory cascades" $
         let complete "/home/user/" = ["/home/user/.config"]
             complete "/home/user/.config/" = ["/home/user/.config/awesome/", "/home/user/.config/nvim/"]

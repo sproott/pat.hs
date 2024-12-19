@@ -88,13 +88,13 @@ completeSingleMark mark goPath = do
 
   let path = (addTrailingPathSeparator value </>) $ fromMaybe "" $ gpPath goPath -- the path to complete
   directChildDirs <- Complete.completeDirectory path -- the direct child directories of the path
-
+  
   dirs <- case directChildDirs of
     [dir] -> -- if there is only one direct child directory
       do 
         newCompletions <- Complete.completeDirectory $ addTrailingPathSeparator dir
         pure $ (if isJust (gpPath goPath) then id else (value : )) $ dir : newCompletions
-    [] -> pure [value] -- if the directory does not exist or has no direct child directories, complete the directory itself
+    [] -> pure $ if isNothing (gpPath goPath) then [value] else []
     _ -> pure directChildDirs
   
   pure $ (replacePrefix value key . addTrailingPathSeparator <$> dirs)
