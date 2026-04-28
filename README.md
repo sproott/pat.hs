@@ -53,6 +53,14 @@ Add the following line to your config.fish:
 source /usr/share/paths/paths.fish
 ```
 
+### Zsh
+
+Add the following line to your .zshrc:
+
+```sh
+source /usr/share/paths/paths.zsh
+```
+
 ## 👷 Building
 
 Haskell Stack needs to be installed and on the path to install manually.
@@ -65,11 +73,13 @@ mkdir bin
 stack --local-bin-path "bin/" install
 
 sudo install -Dm755 "bin/paths" "/usr/share/paths/paths"
-sudo install -Dm755 "paths.sh" "/usr/share/paths/paths.sh"
-sudo install -Dm755 "paths.fish" "/usr/share/paths/paths.fish"
+sudo install -Dm755 "bin/paths.sh" "/usr/share/paths/paths.sh"
+sudo install -Dm755 "bin/paths.fish" "/usr/share/paths/paths.fish"
+sudo install -Dm755 "bin/paths.zsh" "/usr/share/paths/paths.zsh"
 
-sudo install -Dm644 "doc/completions/bashcompletion.sh" "/usr/share/bash-completion/completions/paths"
-sudo install -Dm644 "doc/completions/fishcompletion.fish" "/usr/share/fish/completions/paths.fish"
+sudo install -Dm644 "bin/completions/bashcompletion.sh" "/usr/share/bash-completion/completions/paths"
+sudo install -Dm644 "bin/completions/fishcompletion.fish" "/usr/share/fish/completions/paths.fish"
+sudo install -Dm644 "bin/completions/zshcompletion.zsh" "/usr/share/zsh/site-functions/_paths"
 ```
 
 ## 🔧 Bookmarks file
