@@ -9,20 +9,13 @@ import PatHs.Effect.Complete (Complete)
 import qualified PatHs.Effect.Complete as Complete
 import qualified PatHs.Effect.Error as Error
 import PatHs.Options.Complete (goPathCompleter, keyCompleter)
-import PatHs.Prelude hiding (Predicate)
+import PatHs.Prelude
 import PatHs.Types
 import PatHs.Types.Env
-import Test.Predicates
-  ( Predicate (accept, explain),
-    eq,
-    isEmpty,
-    left,
-    right,
-    unorderedElemsAre,
-  )
 import Test.Tasty (TestTree, defaultMain, testGroup)
 import Test.Tasty.HUnit
   ( Assertion,
+    (@?=),
     assertFailure,
     testCase,
   )
@@ -51,25 +44,15 @@ testKeyCompleter marks =
   testGroup
     "keyCompleter"
     [ testCase "No match" $
-        assert
-          (keyCompleter' "c" marks)
-          isEmpty,
+        assertEmpty (keyCompleter' "c" marks),
       testCase "Single match" $
-        assert
-          (keyCompleter' "r" marks)
-          (eq ["root"]),
+        assertEqual ["root"] (keyCompleter' "r" marks),
       testCase "Single exact match" $
-        assert
-          (keyCompleter' "root" marks)
-          (eq ["root"]),
+        assertEqual ["root"] (keyCompleter' "root" marks),
       testCase "Multiple matches" $
-        assert
-          (keyCompleter' "h" marks)
-          (equivalent ["home", "home2"]),
+        assertEquivalent ["home", "home2"] (keyCompleter' "h" marks),
       testCase "Multiple matches with one exact match" $
-        assert
-          (keyCompleter' "home" marks)
-          (equivalent ["home", "home2"])
+        assertEquivalent ["home", "home2"] (keyCompleter' "home" marks)
     ]
   where
     keyCompleter' :: Text -> Marks -> [Text]
@@ -80,66 +63,40 @@ testGoPathCompleter marks =
   testGroup
     "goPathCompleter"
     [ testCase "No match" $
-        assert
-          (goPathCompleter' "config" marks (const []))
-          (right isEmpty),
+        assertRightWith assertEmpty (goPathCompleter' "config" marks (const [])),
       testCase "Matching mark but directory does not exist" $
-        assert
-          (goPathCompleter' "root" marks (const []))
-          (right (equivalent ["root/"])),
+        assertRightWith (assertEquivalent ["root/"]) (goPathCompleter' "root" marks (const [])),
       testCase "Matching mark with trailing slash but directory does not exist" $
-        assert
-          (goPathCompleter' "root/" marks (const []))
-          (right isEmpty),
+        assertRightWith assertEmpty (goPathCompleter' "root/" marks (const [])),
       testCase "Empty returns all marks" $
-        assert
-          (goPathCompleter' "" marks (const []))
-          (right (equivalent ["home/", "home2/", "root/", "lbin/", "macos/"])),
+        assertRightWith (assertEquivalent ["home/", "home2/", "root/", "lbin/", "macos/"]) (goPathCompleter' "" marks (const [])),
       testCase "Multiple matching marks" $
-        assert
-          (goPathCompleter' "h" marks (const []))
-          (right (equivalent ["home/", "home2/"])),
+        assertRightWith (assertEquivalent ["home/", "home2/"]) (goPathCompleter' "h" marks (const [])),
       testCase "Multiple matching marks with one exact match" $
-        assert
-          (goPathCompleter' "home" marks (const []))
-          (right (equivalent ["home/", "home2/"])),
+        assertRightWith (assertEquivalent ["home/", "home2/"]) (goPathCompleter' "home" marks (const [])),
       testCase "One matching mark completes" $
         let complete "/home/user/" = ["/home/user/.config", "/home/user/.local"]
             complete _ = []
-         in assert
-              (goPathCompleter' "home/" marks complete)
-              (right (equivalent ["home/.config/", "home/.local/"])),
+         in assertRightWith (assertEquivalent ["home/.config/", "home/.local/"]) (goPathCompleter' "home/" marks complete),
       testCase "No matching directory" $
-        assert
-          (goPathCompleter' "root/A" marks (const []))
-          (right isEmpty),
+        assertRightWith assertEmpty (goPathCompleter' "root/A" marks (const [])),
       testCase "One matching directory cascades" $
         let complete "/home/user/" = ["/home/user/.config"]
             complete "/home/user/.config/" = ["/home/user/.config/awesome/", "/home/user/.config/nvim/"]
             complete _ = []
-         in assert
-              (goPathCompleter' "home/" marks complete)
-              (right (equivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"])),
+         in assertRightWith (assertEquivalent ["home/.config/", "home/.config/awesome/", "home/.config/nvim/"]) (goPathCompleter' "home/" marks complete),
       testCase "One subdirectory does not complete immediately" $
         let complete "/root/" = ["/root/.config"]
             complete _ = []
-         in assert
-              (goPathCompleter' "ro" marks complete)
-              (right (equivalent ["root/", "root/.config/"])),
+         in assertRightWith (assertEquivalent ["root/", "root/.config/"]) (goPathCompleter' "ro" marks complete),
       testCase "Multiple matching directories complete" $
         let complete "/home/user/.conf" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
-         in assert
-              (goPathCompleter' "home/.conf" marks complete)
-              (right (equivalent ["home/.config/awesome/", "home/.config/nvim/"])),
+         in assertRightWith (assertEquivalent ["home/.config/awesome/", "home/.config/nvim/"]) (goPathCompleter' "home/.conf" marks complete),
       testCase "GoPath = \"/\" fails" $
-        assert
-          (goPathCompleter' "/" marks (const []))
-          (left $ eq InvalidGoPath),
+        assertLeft InvalidGoPath (goPathCompleter' "/" marks (const [])),
       testCase "GoPath starting with '/' fails" $
-        assert
-          (goPathCompleter' "/.config" marks (const []))
-          (left $ eq InvalidGoPath)
+        assertLeft InvalidGoPath (goPathCompleter' "/.config" marks (const []))
     ]
   where
     goPathCompleter' :: Text -> Marks -> (Text -> [Text]) -> Either AppError [Text]
@@ -170,11 +127,24 @@ verifyMarks list = do
 mkMarks :: [(Text, Text)] -> Maybe Marks
 mkMarks = eitherToMaybe . fmap Map.fromList . traverse (bitraverse (validateKey . Key) (pure . unResolveToHomeDir homeDir))
 
-equivalent :: (Eq a, Show a) => [a] -> Predicate [a]
-equivalent = unorderedElemsAre . fmap eq
+assertEqual :: (Eq a, Show a) => a -> a -> Assertion
+assertEqual expected actual = actual @?= expected
 
-assert :: a -> Predicate a -> Assertion
-assert x p = if accept p x then pure () else assertFailure $ explain p x
+assertEquivalent :: (Ord a, Show a) => [a] -> [a] -> Assertion
+assertEquivalent expected actual = sort actual @?= sort expected
+
+assertEmpty :: (Eq a, Show a) => [a] -> Assertion
+assertEmpty = assertEqual []
+
+assertLeft :: (Eq e, Show e, Show a) => e -> Either e a -> Assertion
+assertLeft expected = \case
+  Left actual -> actual @?= expected
+  Right actual -> assertFailure $ "Expected Left, got Right: " <> show actual
+
+assertRightWith :: Show e => (a -> Assertion) -> Either e a -> Assertion
+assertRightWith check = \case
+  Left err -> assertFailure $ "Expected Right, got Left: " <> show err
+  Right actual -> check actual
 
 runCompletePure :: (Text -> [Text]) -> Eff (Complete : es) a -> Eff es a
 runCompletePure complete = interpret $ \_ -> \case

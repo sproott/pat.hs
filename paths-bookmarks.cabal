@@ -17,7 +17,7 @@ license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    ChangeLog.md
+    CHANGELOG.md
 
 source-repository head
   type: git
@@ -148,7 +148,6 @@ test-suite paths-test
     , effectful
     , effectful-th
     , either
-    , explainable-predicates
     , extra
     , filepath
     , megaparsec
