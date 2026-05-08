@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           paths-bookmarks
-version:        1.0.0
+version:        1.1.0
 description:    Please see the README on GitHub at <https://github.com/sproott/pat.hs#readme>
 homepage:       https://github.com/sproott/pat.hs#readme
 bug-reports:    https://github.com/sproott/pat.hs/issues
