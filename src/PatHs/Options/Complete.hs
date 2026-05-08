@@ -85,16 +85,22 @@ completeSingleMark mark goPath = do
   homeDir <- Reader.asks dirHome
 
   let value = unResolvedValue (resolveToHomeDir homeDir $ unValue (snd mark)) -- the mark's value, resolved to the home dir
-
   let path = (addTrailingPathSeparator value </>) $ fromMaybe "" $ gpPath goPath -- the path to complete
   directChildDirs <- Complete.completeDirectory path -- the direct child directories of the path
-  
   dirs <- case directChildDirs of
-    [dir] -> -- if there is only one direct child directory
-      do 
+    [dir] ->
+      -- if there is only one direct child directory
+      do
         newCompletions <- Complete.completeDirectory $ addTrailingPathSeparator dir
-        pure $ (if isJust (gpPath goPath) then id else (value : )) $ dir : newCompletions
+        pure $ (if isJust (gpPath goPath) then id else (value :)) $ dir : newCompletions
     [] -> pure $ if isNothing (gpPath goPath) then [value] else []
-    _ -> pure directChildDirs
-  
-  pure $ (replacePrefix value key . addTrailingPathSeparator <$> dirs)
+    _ -> pure $ (if isNothing (gpPath goPath) then (value :) else id) directChildDirs
+
+  let formatCompletion dir =
+        let formattedDir =
+              if isNothing (gpPath goPath) && length directChildDirs > 1 && dir /= value
+                then dir
+                else addTrailingPathSeparator dir
+         in replacePrefix value key formattedDir
+
+  pure $ formatCompletion <$> dirs

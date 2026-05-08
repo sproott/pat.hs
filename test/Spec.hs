@@ -89,6 +89,10 @@ testGoPathCompleter marks =
         let complete "/root/" = ["/root/.config"]
             complete _ = []
          in assertRightWith (assertEquivalent ["root/", "root/.config/"]) (goPathCompleter' "ro" marks complete),
+      testCase "Multiple subdirectories with same prefix do not complete immediately" $
+        let complete "/root/" = ["/root/file1", "/root/file2"]
+            complete _ = []
+         in assertRightWith (assertEquivalent ["root/", "root/file1", "root/file2"]) (goPathCompleter' "ro" marks complete),
       testCase "Multiple matching directories complete" $
         let complete "/home/user/.conf" = ["/home/user/.config/awesome", "/home/user/.config/nvim"]
             complete _ = []
